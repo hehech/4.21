@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.start.mapper.UserMapper">
+    <!-- 插入用户数据（完整SQL映射） -->
+    <insert id="addUser" parameterType="com.start.entitle.User">
+        INSERT INTO "user" (
+            "account",
+            "password",
+            "avater_url",
+            "bio",
+            "nickname"
+        ) VALUES (
+                     #{account},
+                     #{password},
+                     #{avaterUrl},
+                     #{bio},
+                     #{nickname}
+                 )
+    </insert>
+
+<!--    根据account查询用户信息-->
+    <select id="findByAccount" parameterType="String" resultType="com.start.entitle.User">
+        SELECT *
+        FROM "user"
+        WHERE "account" = #{account}
+    </select>
+</mapper>

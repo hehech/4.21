@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@123.56.178.104:1521:orcl # 使用图片中的 SID "orcl"
+    username: worker                                # 用户名
+    password: 1z2y3x4w                    # 密码（替换为实际值，建议加密）
+    driver-class-name: oracle.jdbc.OracleDriver  # Oracle 驱动
+
+server:
+  port: 7777
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true #开启下划线命名和驼峰明明的自动转换
+  mapper-locations: classpath:mapper/*.xml
+
+logging:
+  level:
+    com.start.mapper: DEBUG
+
