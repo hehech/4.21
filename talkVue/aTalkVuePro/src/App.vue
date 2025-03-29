@@ -3,8 +3,7 @@
 </script>
 
 <template>
-  <!-- <router-view></router-view> -->
-   <myinfoVue/>
+  <router-view></router-view>
 </template>
 
 <style scoped>

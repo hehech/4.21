@@ -1,7 +1,7 @@
 <script setup>
 
 import { ref } from 'vue';
-
+import { ArrowDown } from '@element-plus/icons-vue'
 const searchForm = ref({
   query: ''
 });
@@ -88,18 +88,8 @@ const options = {
 //热门吧展示
 import avatar1 from '@/assets/login.jpeg'
 const items = ref([
-  { icon: 'avatar1', name: '抗压背锅', clickCount: 575 },
-  { icon: 'avatar1', name: '孙笑川', clickCount: 685 },
-  { icon: 'avatar1', name: '崩坏星穹铁...', clickCount: 32.9 },
-  { icon: 'avatar1', name: '第五人格交易', clickCount: 153.3 },
-  { icon: 'avatar1', name: 'lol陪玩', clickCount: 812.3 },
-  { icon: 'avatar1', name: 'bilibili', clickCount: 453.8 },
-  { icon: 'avatar1', name: 'kpl', clickCount: 173.9 },
-  { icon: 'avatar1', name: '星穹铁道内鬼', clickCount: 5.8 },
-  { icon: 'avatar1', name: 'f1', clickCount: 36.3 },
-  { icon: 'avatar1', name: '有男不玩ml', clickCount: 4.9 },
-  { icon: 'avatar1', name: '王者荣耀', clickCount: 1416.4 },
-  { icon: 'avatar1', name: '剑网3', clickCount: 838.8 },
+  { icon: 'avatar1', name: '抗压背锅', viewCount: 575 },
+  { icon: 'avatar1', name: '孙笑川', viewCount: 685 }
 ]);
 import { getAllBoard } from '@/api/board';
 const getAllBoards = async () => {
@@ -111,16 +101,24 @@ getAllBoards();
 
 //登录信息显示
 const userinfo = ref({
-  nickname:'',
-  bio:'',
-  vipGrade:''
+  nickname: '',
+  bio: '',
+  vipGrade: ''
 })
 import { findUser } from '@/api/user.js';
-const getUserInfo=async()=>{
-  const result=await findUser();
-  userinfo.value=result.data;
+const getUserInfo = async () => {
+  const result = await findUser();
+  userinfo.value = result.data;
 }
 getUserInfo();
+
+import { useRouter } from 'vue-router'//导入创建路由器函数
+const router = useRouter()
+const TurnToMyinf0 = () => {
+  router.push('/myinfo');
+}
+
+
 
 </script>
 
@@ -141,9 +139,44 @@ getUserInfo();
       <!-- 右侧导航组件 -->
       <div>
         <el-button-group>
-          <el-button icon="search">搜索</el-button>
-          <el-button icon="message">消息</el-button>
-          <el-button icon="user">我的</el-button>
+
+          <el-dropdown>
+            <el-button type="primary" icon="search">我的<el-icon
+                class="el-icon--right"><arrow-down /></el-icon></el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>我的关注</el-dropdown-item>
+                <el-dropdown-item>我的贴吧</el-dropdown-item>
+                <el-dropdown-item>我的主页</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          
+          <el-dropdown>
+            <el-button type="primary" icon="search">会员<el-icon
+                class="el-icon--right"><arrow-down /></el-icon></el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>会员升级</el-dropdown-item>
+                <el-dropdown-item>会员权限</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
+
+
+
+          <el-dropdown>
+            <el-button type="primary" icon="user">更多<el-icon class="el-icon--right"><arrow-down /></el-icon></el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>账号设置</el-dropdown-item>
+                <el-dropdown-item>问题反馈</el-dropdown-item>
+                <el-dropdown-item  divided>切换账号</el-dropdown-item>
+                <el-dropdown-item>退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </el-button-group>
       </div>
     </el-header>
@@ -192,7 +225,7 @@ getUserInfo();
 
             <div style="display: flex;">
               <!-- 用户头像区（左侧） -->
-              <div style="display: flex; flex-direction: column;">
+              <div style="display: flex; flex-direction: column;" @click="TurnToMyinf0">
                 <el-avatar class="custom-avatar" style="width: 90px; height: 90px;"></el-avatar>
                 <h4 style=" margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
@@ -211,20 +244,20 @@ getUserInfo();
               </div>
             </div>
             <div class="profile-content" style="width: 100%;">
-              <p>{{ userinfo.bio}}
+              <p>{{ userinfo.bio }}
               </p>
             </div>
             <!-- 优化后的功能按钮组
             <el-button-group style="display: flex;">
               左侧按钮：占满50%宽度并左对齐 -->
-              <!-- <el-button> -->
-                <!-- 编辑资料 -->
-              <!-- </el-button> -->
+            <!-- <el-button> -->
+            <!-- 编辑资料 -->
+            <!-- </el-button> -->
 
-              <!-- 右侧按钮：自动填充剩余空间 -->
-              <!-- <el-button> -->
-                <!-- 退出登录 -->
-              <!-- </el-button> -->
+            <!-- 右侧按钮：自动填充剩余空间 -->
+            <!-- <el-button> -->
+            <!-- 退出登录 -->
+            <!-- </el-button> -->
             <!-- </el-button-group> -->
           </el-card>
 
@@ -279,7 +312,7 @@ getUserInfo();
                     <img :src="avatar1" alt="icon" class="baIcon">
                     <div style="display: flex;flex-direction: column;margin: 0 0 0 5px;">
                       <div>{{ item.name }}</div>
-                      <div>{{ item.clickCount }}</div>
+                      <div>{{ item.viewCount }}</div>
                     </div>
                   </div>
                 </el-col>
@@ -287,8 +320,8 @@ getUserInfo();
             </div>
           </div>
 
-          <!-- 最新动态 -->
-          <h3 style="color: #333;">最新动态</h3>
+          <!-- 热门动态 -->
+          <h3 style="color: #333;">热门动态</h3>
           <div style="box-shadow: 0 2px 10px rgba(0,0,0,0.1);padding:20px;height: 200px;
         overflow-y: auto;
         border-radius: 4px;">
@@ -328,12 +361,12 @@ getUserInfo();
 
 
 <style scoped>
-
-
 .profile-content p {
-  font-size: 13px; /* 调整字体大小 */
+  font-size: 13px;
+  /* 调整字体大小 */
   color: #333;
 }
+
 .icon {
   width: 50px;
   height: 50px;
