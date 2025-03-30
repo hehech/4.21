@@ -12,4 +12,7 @@ public interface BoardMapper {
     //查询所有板块
     @Select("select * from \"board\"")
     List<Board> findBoards();
+
+    @Select("select \"name\" from \"board\" where \"board_id\"=#{id}")
+    String findBoardNameById(Integer id);
 }

@@ -9,4 +9,6 @@ public interface BoardService {
 
     //查询所有板块
     List<Board> display();
+
+    String findBoardNameById(Integer id);
 }

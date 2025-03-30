@@ -1,11 +1,17 @@
 package com.start.controller;
 
 
+import com.start.entitle.Board;
+import com.start.entitle.Post;
+import com.start.entitle.Result;
 import com.start.service.BoardService;
 import com.start.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/post")
@@ -13,6 +19,16 @@ public class PostControl {
     @Autowired
     private PostService postService;
 
+    @GetMapping
+    public Result<List<Post>> list(){
+        List<Post> cs= postService.display();
+        return Result.success(cs);
+    }
+    @GetMapping("/perpost")
+    public Result<List<Post>> perPost(){
+        List<Post> cs= postService.findPostById();
+        return Result.success(cs);
+    }
 
 
 }

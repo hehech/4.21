@@ -2,6 +2,9 @@ package com.start.mapper;
 
 import com.start.entitle.Post;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
 * @author hao
@@ -15,4 +18,9 @@ import org.apache.ibatis.annotations.Mapper;
 public interface PostMapper {
 
 
+
+    @Select("select * from \"post\"")
+    List<Post> findPosts();
+    @Select("select * from \"post\" where \"user_id\"=#{id}")
+    List<Post> findPostById(Integer id);
 }

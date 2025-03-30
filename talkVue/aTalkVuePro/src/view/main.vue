@@ -1,7 +1,9 @@
 <script setup>
 
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { ArrowDown } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'//导入创建路由器函数
+const router = useRouter()
 const searchForm = ref({
   query: ''
 });
@@ -20,76 +22,14 @@ const handleAllSearch = () => {
   // 这里可以添加搜索逻辑
 };
 
-const options = {
-  fpsLimit: 60,
-  interactivity: {
-    detectsOn: 'canvas',
-    modes: { // 配置动画效果
-      bubble: {
-        distance: 400,
-        duration: 2,
-        opacity: 0.8,
-        size: 40
-      },
-      push: {
-        quantity: 4
-      },
-      grab: {
-        distance: 200,
-        duration: 0.4
-      },
-    }
-  },
-  particles: {
-    color: {
-      value: '#01FCCA' // 粒子点的颜色
-    },
-    links: {
-      color: '#03EDF6', // 线条颜色
-      distance: 150,//线条距离
-      enable: true,
-      opacity: 0.5, // 不透明度
-      width: 1.2 // 线条宽度
-    },
-    collisions: {
-      enable: true
-    },
-    move: {
-      attract: { enable: false, rotateX: 600, rotateY: 1200 },
-      bounce: false,
-      direction: 'none',
-      enable: true,
-      out_mode: 'out',
-      random: false,
-      speed: 0.5, // 移动速度
-      straight: false
-    },
-    number: {
-      density: {
-        enable: true,
-        value_area: 800
-      },
-      value: 80//粒子数
-    },
-    opacity: {//粒子透明度
-      value: 0.7
-    },
-    shape: {//粒子样式
-      type: 'triangle'
-    },
-    size: {//粒子大小
-      random: true,
-      value: 3
-    }
-  },
-  detectRetina: true
-}
-
+//===========================================================================================
 //热门吧展示
-import avatar1 from '@/assets/login.jpeg'
+import avatar1 from '@/assets/xiaoxin.jpg'
 const items = ref([
-  { icon: 'avatar1', name: '抗压背锅', viewCount: 575 },
-  { icon: 'avatar1', name: '孙笑川', viewCount: 685 }
+  {
+    icon: 'avatar1', name: '抗压背锅', viewCount: 575,
+    showUnderline: false
+  }
 ]);
 import { getAllBoard } from '@/api/board';
 const getAllBoards = async () => {
@@ -97,8 +37,11 @@ const getAllBoards = async () => {
   items.value = result.data;
 };
 getAllBoards();
-
-
+//点击事件
+const handleTitleClick_RB = () => {
+  router.push("/board");
+}
+//===========================================================================================
 //登录信息显示
 const userinfo = ref({
   nickname: '',
@@ -112,11 +55,119 @@ const getUserInfo = async () => {
 }
 getUserInfo();
 
-import { useRouter } from 'vue-router'//导入创建路由器函数
-const router = useRouter()
+//=============================================================================================
+
 const TurnToMyinf0 = () => {
   router.push('/myinfo');
 }
+
+//====================================================================================================
+
+//热门动态显示
+//文章内容
+const arts = ref([
+  {
+    boardId: 1, title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
+    boardName: '',
+    showUnderline_B: false
+  }
+]);
+import { findPost, findBoardNameById } from '@/api/post';
+const getAllPost = async () => {
+  try {
+    // 1. 获取帖子列表
+    const result = await findPost();
+
+    // 2. 并行获取每个帖子的boardName
+    const updatedArts = await Promise.all(
+      result.data.map(async post => {
+        const boardInfo = await findBoardNameById(post.boardId);
+        return {
+          ...post,
+          boardName: boardInfo.data || '未知板块'
+        };
+      })
+    );
+
+    // 3. 更新响应式数据
+    arts.value = updatedArts;
+  } catch (error) {
+    console.error('数据加载失败:', error);
+    arts.value = []; // 失败时清空数据
+  }
+}
+getAllPost();
+const scrollbar_H = ref(null);
+// 计算属性：只显示前 2 个卡片
+const visibleArts = computed(() => {
+  return arts.value.slice(0, 3);
+});
+// 加载更多帖子
+const loadMore_H = () => {
+  // 这里可以加载更多数据或展开所有卡片
+  console.log('加载更多帖子');
+};
+//title点击处理
+const handleTitleClick_H = () => {
+
+}
+const handleTitleClick_H_B = () => {
+
+}
+//===================================================================================================
+//个人最新动态
+//文章内容
+const parts = ref([
+  {
+    boardId: 1, title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
+    boardName: '',
+    showUnderline_B: false
+  }
+]);
+import { findPersonalPost } from '@/api/post';
+const getMyPosts = async () => {
+  try {
+    // 1. 获取帖子列表
+    const result = await findPersonalPost();
+
+    // 2. 并行获取每个帖子的boardName
+    const updatedArts = await Promise.all(
+      result.data.map(async post => {
+        const boardInfo = await findBoardNameById(post.boardId);
+        return {
+          ...post,
+          boardName: boardInfo.data || '未知板块'
+        };
+      })
+    );
+
+    // 3. 更新响应式数据
+    parts.value = updatedArts;
+  } catch (error) {
+    console.error('数据加载失败:', error);
+    parts.value = []; // 失败时清空数据
+  }
+}
+getMyPosts();
+
+const scrollbar_P = ref(null);
+const visibleParts = computed(() => {
+  return parts.value.slice(0, 3);
+});
+const loadMore_P = () => {
+  // 这里可以加载更多数据或展开所有卡片
+  console.log('加载更多帖子');
+};
+//title点击处理
+const handleTitleClick_P = () => {
+
+}
+const handleTitleClick_P_B = () => {
+
+}
+//======================================================================================================
+
+
 
 
 
@@ -151,7 +202,7 @@ const TurnToMyinf0 = () => {
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          
+
           <el-dropdown>
             <el-button type="primary" icon="search">会员<el-icon
                 class="el-icon--right"><arrow-down /></el-icon></el-button>
@@ -172,7 +223,7 @@ const TurnToMyinf0 = () => {
               <el-dropdown-menu>
                 <el-dropdown-item>账号设置</el-dropdown-item>
                 <el-dropdown-item>问题反馈</el-dropdown-item>
-                <el-dropdown-item  divided>切换账号</el-dropdown-item>
+                <el-dropdown-item divided>切换账号</el-dropdown-item>
                 <el-dropdown-item>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -225,8 +276,8 @@ const TurnToMyinf0 = () => {
 
             <div style="display: flex;">
               <!-- 用户头像区（左侧） -->
-              <div style="display: flex; flex-direction: column;" @click="TurnToMyinf0">
-                <el-avatar class="custom-avatar" style="width: 90px; height: 90px;"></el-avatar>
+              <div style="display: flex; flex-direction: column;">
+                <el-avatar class="custom-avatar" style="width: 110px; height: 110px;" @click="TurnToMyinf0"></el-avatar>
                 <h4 style=" margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
 
@@ -247,55 +298,41 @@ const TurnToMyinf0 = () => {
               <p>{{ userinfo.bio }}
               </p>
             </div>
-            <!-- 优化后的功能按钮组
-            <el-button-group style="display: flex;">
-              左侧按钮：占满50%宽度并左对齐 -->
-            <!-- <el-button> -->
-            <!-- 编辑资料 -->
-            <!-- </el-button> -->
 
-            <!-- 右侧按钮：自动填充剩余空间 -->
-            <!-- <el-button> -->
-            <!-- 退出登录 -->
-            <!-- </el-button> -->
-            <!-- </el-button-group> -->
           </el-card>
 
           <!-- 最新动态区 -->
           <h3 style="margin: 0 0 15px 0;">
             最新动态
           </h3>
-          <div style="margin: 10px 0 0 0;height: 200px;overflow-y: auto;border-radius: 4px;">
-            <div class="post-card" style="margin:0 0 15px 0;">
-              <h4 style="margin: 0 0 12px 0;">
-                post信息
-              </h4>
-              <!-- 帖子信息 -->
-              <div style="display: flex; justify-content: space-between; 
-                   color: #999; font-size: 12px;">
-                <span style="color: #ff4d4f; font-weight: bold;">
-                  post.hot
-                </span>
-                <span>
-                  post.time
-                </span>
+          <div style="margin: 10px 0 0 0;overflow-y: auto;border-radius: 4px;">
+            <el-scrollbar ref="scrollbar_P" style="height: 100%;">
+              <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
+              <div v-for="(art, index) in visibleParts" :key="index">
+                <el-card style="background: #f8fafc; margin: 0 0 15px 0;">
+                  <el-list>
+                    <el-list-item style="display: flex; flex-direction: column;">
+                      <span style="margin: 0 0 15px 0;color: #01888D; cursor: pointer; text-decoration: none;"
+                        @click="handleTitleClick_P_B" @mouseenter="art.showUnderline_B = true"
+                        @mouseleave="art.showUnderline_B = false"
+                        :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
+                        {{ art.boardName || '匿名用户' }}
+                      </span>
+                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_P"
+                        @mouseenter="art.showUnderline = true" @mouseleave="art.showUnderline = false"
+                        :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
+                        {{ art.title }}
+                      </span>
+                    </el-list-item>
+                  </el-list>
+                </el-card>
               </div>
-            </div>
-            <div class="post-card" style="margin:0 0 15px 0;">
-              <h4 style="margin: 0 0 12px 0;">
-                post信息
-              </h4>
-              <!-- 帖子信息 -->
-              <div style="display: flex; justify-content: space-between; 
-                   color: #999; font-size: 12px;">
-                <span style="color: #ff4d4f; font-weight: bold;">
-                  post.hot
-                </span>
-                <span>
-                  post.time
-                </span>
+              <div style="display: flex; justify-content: center; width: 100%;">
+                <el-link type="primary" @click="loadMore_H" style="font-size: 14px; cursor: pointer;">
+                  更多帖子
+                </el-link>
               </div>
-            </div>
+            </el-scrollbar>
 
           </div>
         </el-card>
@@ -304,15 +341,31 @@ const TurnToMyinf0 = () => {
         <el-card style="flex: 3;margin: 0 20px 20px 0;">
           <!-- 热门话题 -->
           <div style="">
-            <h3 style="margin: 0 0 15px 0;">热门话题</h3>
+            <h3 style="margin: 0 0 5px 0; display: flex; align-items: center;">
+              <img src="@/assets/remen.png" alt="view icon" style="width: 18px; height: 18px; margin-right: 4px;">
+              热门话题
+            </h3>
             <div>
               <el-row>
-                <el-col :span="4" v-for="(item, index) in items" :key="index">
+                <el-col :span="6" v-for="(item, index) in items" :key="index">
                   <div style="display: flex;flex-direction: row;margin: 15px 15px 15px 0;">
                     <img :src="avatar1" alt="icon" class="baIcon">
                     <div style="display: flex;flex-direction: column;margin: 0 0 0 5px;">
-                      <div>{{ item.name }}</div>
-                      <div>{{ item.viewCount }}</div>
+                      <div style="display: flex; align-items: center;">
+                        <img src="@/assets/tieba.png" alt="view icon"
+                          style="width: 16px; height: 16px; margin-right: 4px;">
+                        <span style="color: #d82100; cursor: pointer; text-decoration: none;"
+                          @click="handleTitleClick_RB" @mouseenter="item.showUnderline = true"
+                          @mouseleave="item.showUnderline = false"
+                          :style="{ textDecoration: item.showUnderline ? 'underline' : 'none', fontSize: '18px' }">
+                          {{ item.name }}
+                        </span>
+                      </div>
+                      <div style="display: flex; align-items: center;">
+                        <img src="@/assets/renqi.png" alt="view icon"
+                          style="width: 16px; height: 16px; margin-right: 4px;">
+                        <span>{{ item.viewCount }}</span>
+                      </div>
                     </div>
                   </div>
                 </el-col>
@@ -321,29 +374,43 @@ const TurnToMyinf0 = () => {
           </div>
 
           <!-- 热门动态 -->
-          <h3 style="color: #333;">热门动态</h3>
-          <div style="box-shadow: 0 2px 10px rgba(0,0,0,0.1);padding:20px;height: 200px;
-        overflow-y: auto;
-        border-radius: 4px;">
+          <h3 style="margin: 10px 0 15px 0; display: flex; align-items: center;">
+              <img src="@/assets/dongtai.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 5px;">
+              热门动态
+          </h3>
 
-            <el-card style="background: #f8fafc;margin: 0 0 15px 0;">
-              <el-list>
-                <el-list-item style="display: flex; flex-direction: column;">
-                  <span style="margin: 0 0 15px 0;">发布人名称</span>
-                  <span style="color: #ff4d4f;">文章标题</span>
-                </el-list-item>
-              </el-list>
-            </el-card>
-
-            <el-card style="background: #f8fafc;">
-              <el-list>
-                <el-list-item style="display: flex; flex-direction: column;">
-                  <span style="margin: 0 0 15px 0;">发布人名称</span>
-                  <span style="color: #ff4d4f;">文章标题</span>
-                </el-list-item>
-              </el-list>
-            </el-card>
+          <div style="height: 400px; position: relative;">
+            <!-- 使用 el-scrollbar 包裹卡片列表 -->
+            <el-scrollbar ref="scrollbar_H" style="height: 100%;">
+              <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
+              <div v-for="(art, index) in visibleArts" :key="index">
+                <el-card style="background: #f8fafc; margin: 0 0 15px 0;">
+                  <el-list>
+                    <el-list-item style="display: flex; flex-direction: column;">
+                      <span style="margin: 0 0 15px 0;color: #d82100; cursor: pointer; text-decoration: none;"
+                        @click="handleTitleClick_H_B" @mouseenter="art.showUnderline_B = true"
+                        @mouseleave="art.showUnderline_B = false"
+                        :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
+                        {{ art.boardName || '匿名用户' }}
+                      </span>
+                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_H"
+                        @mouseenter="art.showUnderline = true" @mouseleave="art.showUnderline = false"
+                        :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
+                        {{ art.title }}
+                      </span>
+                      <p>{{ art.content }}</p>
+                    </el-list-item>
+                  </el-list>
+                </el-card>
+              </div>
+              <div style="display: flex; justify-content: center; width: 100%;">
+                <el-link type="primary" @click="loadMore_P" style="font-size: 14px; cursor: pointer;">
+                  更多帖子
+                </el-link>
+              </div>
+            </el-scrollbar>
           </div>
+
 
         </el-card>
 
@@ -399,10 +466,10 @@ const TurnToMyinf0 = () => {
 
 .baIcon {
   /* 1. 禁用默认圆形裁剪 */
-  border-radius: 0 !important;
+  border-radius: 5px;
   overflow: hidden;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   /* 防止图片超出容器 */
 }
 
@@ -410,8 +477,6 @@ const TurnToMyinf0 = () => {
   /* 1. 禁用默认圆形裁剪 */
   border-radius: 0 !important;
   overflow: hidden;
-  width: 90px;
-  height: 90px;
   /* 防止图片超出容器 */
 }
 
@@ -423,7 +488,7 @@ const TurnToMyinf0 = () => {
   height: 100%;
 
   /* 3. 图片填充策略：保持宽高比并完整显示 */
-  background-image: url('@/assets/bg1.jpg');
+  background-image: url('@/assets/xiaoxin.jpg');
   background-size: contain;
   /* 图片等比缩放填满容器 */
   background-repeat: no-repeat;
