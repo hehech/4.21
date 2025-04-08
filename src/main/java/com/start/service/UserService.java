@@ -12,4 +12,6 @@ public interface UserService {
     User findByAccount(String account);
     //获取当前登录用户信息
     User getCurrentUser();
+    //
+    User getuserinfobyid(Integer id);
 }

@@ -29,6 +29,15 @@ public class PostControl {
         List<Post> cs= postService.findPostById();
         return Result.success(cs);
     }
-
+    @GetMapping("/onepost")
+    public Result<Post> getonepost(Integer id){
+        Post cs= postService.getonepost(id);
+        return Result.success(cs);
+    }
+    @GetMapping("/hotpost")
+    public Result<List<Post>> gethotbapost(Integer id){
+        List<Post> cs= postService.gethotbapost(id);
+        return Result.success(cs);
+    }
 
 }

@@ -28,4 +28,15 @@ public class PostServiceImpl implements PostService {
         Integer id = (Integer) map.get("id");
         return postMapper.findPostById(id);
     }
+
+    @Override
+    public Post getonepost(Integer id) {
+        return postMapper.getonepost(id);
+    }
+
+    @Override
+    public List<Post> gethotbapost(Integer id) {
+        //要在这里实现排序的逻辑
+        return postMapper.gethotbapost(id);
+    }
 }

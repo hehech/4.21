@@ -65,4 +65,10 @@ public class UserController {
     public Result<User> getCurrentUser(){
         return Result.success(userService.getCurrentUser());
     }
+    //根据userid找userinfo
+    @GetMapping("/userinfo")
+    public Result<User> getuserinfobyid(Integer id){
+        User cs= userService.getuserinfobyid(id);
+        return Result.success(cs);
+    }
 }

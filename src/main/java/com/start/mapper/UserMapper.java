@@ -17,4 +17,6 @@ public interface UserMapper {
     void addUser(User user);
 
     User findByAccount(String account);
+    @Select("select * from \"user\" where \"user_id\"=#{id}")
+    User getuserinfobyid(Integer id);
 }

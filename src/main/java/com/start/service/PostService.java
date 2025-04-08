@@ -9,4 +9,6 @@ public interface PostService {
     List<Post> display();
 
     List<Post> findPostById();
+    Post getonepost(Integer id);
+    List<Post> gethotbapost(Integer id);
 }

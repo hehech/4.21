@@ -18,9 +18,14 @@ import java.util.List;
 public interface PostMapper {
 
 
-
     @Select("select * from \"post\"")
     List<Post> findPosts();
     @Select("select * from \"post\" where \"user_id\"=#{id}")
     List<Post> findPostById(Integer id);
+    @Select("select * from \"post\" where \"board_id\"=#{id}")
+    List<Post> getBapost(Integer id);
+    @Select("select * from \"post\" where \"post_id\"=#{id}")
+    Post getonepost(Integer id);
+    @Select("select * from \"post\" where \"board_id\"=#{id}")
+    List<Post> gethotbapost(Integer id);
 }
