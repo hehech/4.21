@@ -10,6 +10,7 @@ import App from './App.vue'
 import {createPersistedState} from 'pinia-persistedstate-plugin'
 import router from '@/router'
 
+
 const app=createApp(App);
 const pinia = createPinia();
 const persist=createPersistedState();
