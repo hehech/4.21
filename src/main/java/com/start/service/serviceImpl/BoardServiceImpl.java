@@ -29,4 +29,9 @@ public class BoardServiceImpl implements BoardService {
     public String findBoardNameById(Integer id) {
         return boardMapper.findBoardNameById(id);
     }
+
+    @Override
+    public Board findBoardinfoById(Integer id) {
+        return boardMapper.findBoardinfoById(id);
+    }
 }

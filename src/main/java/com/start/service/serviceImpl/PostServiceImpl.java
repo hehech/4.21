@@ -39,4 +39,9 @@ public class PostServiceImpl implements PostService {
         //要在这里实现排序的逻辑
         return postMapper.gethotbapost(id);
     }
+
+    @Override
+    public List<Post> getbapost(Integer id) {
+        return postMapper.getbapost(id);
+    }
 }

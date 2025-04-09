@@ -16,4 +16,6 @@ public interface BoardMapper {
     @Select("select \"name\" from \"board\" where \"board_id\"=#{id}")
     String findBoardNameById(Integer id);
 
+    @Select("select * from \"board\" where \"board_id\"=#{id}")
+    Board findBoardinfoById(Integer id);
 }

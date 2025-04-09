@@ -14,4 +14,6 @@ public interface UserService {
     User getCurrentUser();
     //
     User getuserinfobyid(Integer id);
+
+    Integer findPerPost();
 }

@@ -19,4 +19,6 @@ public interface UserMapper {
     User findByAccount(String account);
     @Select("select * from \"user\" where \"user_id\"=#{id}")
     User getuserinfobyid(Integer id);
+    @Select("SELECT COUNT(*) FROM \"post\" WHERE \"user_id\" = #{id}")
+    Integer getPerPostCount(Integer id);
 }

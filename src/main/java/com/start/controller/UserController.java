@@ -71,4 +71,9 @@ public class UserController {
         User cs= userService.getuserinfobyid(id);
         return Result.success(cs);
     }
+    @GetMapping("/perpostcount")
+    public Result<Integer> getuserinfobyid(){
+        Integer cs= userService.findPerPost();
+        return Result.success(cs);
+    }
 }

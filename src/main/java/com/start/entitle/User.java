@@ -38,4 +38,6 @@ public class User {
     private Date banEndTime;//封禁结束时间
 
     private Long vipGrade;//vip等级
+
+    private String address;
 }

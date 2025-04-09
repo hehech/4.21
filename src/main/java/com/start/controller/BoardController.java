@@ -32,4 +32,9 @@ public class BoardController {
         return Result.success(cs);
     }
 
+    @GetMapping("/boardinfo")
+    public Result<Board> findBoardinfoById(Integer id){
+        Board cs=boardService.findBoardinfoById(id);
+        return Result.success(cs);
+    }
 }

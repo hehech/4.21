@@ -28,4 +28,6 @@ public interface PostMapper {
     Post getonepost(Integer id);
     @Select("select * from \"post\" where \"board_id\"=#{id}")
     List<Post> gethotbapost(Integer id);
+    @Select("select * from \"post\" where \"board_id\"=#{id}")
+    List<Post> getbapost(Integer id);
 }

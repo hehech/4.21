@@ -24,35 +24,53 @@ const handleAllSearch = () => {
 
 //===========================================================================================
 //热门吧展示
-import avatar1 from '@/assets/xiaoxin.jpg'
 const items = ref([
   {
-    icon: 'avatar1', name: '抗压背锅', viewCount: 575,
+    boardId:1,avaterUrl: 'avatar1', name: '抗压背锅', viewCount: 575,
     showUnderline: false
   }
 ]);
 import { getAllBoard } from '@/api/board';
 const getAllBoards = async () => {
   const result = await getAllBoard();
+  console.log("查询的 result:", result.data);
   items.value = result.data;
 };
 getAllBoards();
 //点击事件
-const handleTitleClick_RB = () => {
-  router.push("/board");
+const handleTitleClick_RB = (id) => {
+  router.push({
+        path:"/board",
+        query: {
+            boardId: id
+        } 
+    });
 }
 //===========================================================================================
 //登录信息显示
 const userinfo = ref({
+  avaterUrl:'',
   nickname: '',
   bio: '',
-  vipGrade: ''
+  vipGrade: '',
+  PostCount:1
 })
-import { findUser } from '@/api/user.js';
+import { findUser,findPerPost } from '@/api/user.js';
 const getUserInfo = async () => {
-  const result = await findUser();
-  userinfo.value = result.data;
-}
+  try {
+    // 1. 获取用户基本信息
+    const userResult = await findUser();
+    // 2. 获取用户帖子数
+    const postResult = await findPerPost();
+    // 更新用户信息
+    userinfo.value = {
+      ...userResult.data,
+      PostCount: postResult.data || 0
+    };
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+  }
+};
 getUserInfo();
 
 //=============================================================================================
@@ -67,7 +85,7 @@ const TurnToMyinf0 = () => {
 //文章内容
 const arts = ref([
   {
-    boardId: 1, title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
+    boardId: 1, postId:1,title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
     boardName: '',
     showUnderline_B: false
   }
@@ -108,11 +126,22 @@ const loadMore_H = () => {
   console.log('加载更多帖子');
 };
 //title点击处理
-const handleTitleClick_H = () => {
-
+const handleTitleClick_H = (post) => {
+  router.push({
+        path:"/post",
+        query: {
+            boardId: post.boardId,
+            postId:post.postId
+        } 
+    });
 }
-const handleTitleClick_H_B = () => {
-
+const handleTitleClick_H_B = (id) => {
+  router.push({
+        path:"/board",
+        query: {
+            boardId: id
+        } 
+    });
 }
 //===================================================================================================
 //个人最新动态
@@ -159,14 +188,27 @@ const loadMore_P = () => {
   console.log('加载更多帖子');
 };
 //title点击处理
-const handleTitleClick_P = () => {
-
+const handleTitleClick_P = (post) => {
+  router.push({
+        path:"/post",
+        query: {
+            boardId: post.boardId,
+            postId:post.postId
+        } 
+    });
 }
-const handleTitleClick_P_B = () => {
-
+const handleTitleClick_P_B = (id) => {
+  router.push({
+        path:"/board",
+        query: {
+            boardId: id
+        } 
+    });
 }
 //======================================================================================================
-
+const goToMyInfo=()=>{
+  router.push("/myinfo");
+}
 
 
 
@@ -198,7 +240,7 @@ const handleTitleClick_P_B = () => {
               <el-dropdown-menu>
                 <el-dropdown-item>我的关注</el-dropdown-item>
                 <el-dropdown-item>我的贴吧</el-dropdown-item>
-                <el-dropdown-item>我的主页</el-dropdown-item>
+                <el-dropdown-item @click="goToMyInfo">我的主页</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -277,7 +319,7 @@ const handleTitleClick_P_B = () => {
             <div style="display: flex;">
               <!-- 用户头像区（左侧） -->
               <div style="display: flex; flex-direction: column;">
-                <el-avatar class="custom-avatar" style="width: 110px; height: 110px;" @click="TurnToMyinf0"></el-avatar>
+                <el-avatar :src="userinfo.avaterUrl|| '@/assets/tieba.png'"class="custom-avatar" style="width: 110px; height: 110px;" @click="TurnToMyinf0"></el-avatar>
                 <h4 style=" margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
 
@@ -287,7 +329,7 @@ const handleTitleClick_P_B = () => {
                   VIP：{{ userinfo.vipGrade }}
                 </div>
                 <div style="margin-bottom: 12px;">
-                  帖子：1234
+                  帖子：{{ userinfo.PostCount }}
                 </div>
                 <div>
                   粉丝：567
@@ -313,12 +355,12 @@ const handleTitleClick_P_B = () => {
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
                       <span style="margin: 0 0 15px 0;color: #01888D; cursor: pointer; text-decoration: none;"
-                        @click="handleTitleClick_P_B" @mouseenter="art.showUnderline_B = true"
+                        @click="handleTitleClick_P_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                         @mouseleave="art.showUnderline_B = false"
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_P"
+                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_P(art)"
                         @mouseenter="art.showUnderline = true" @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
                         {{ art.title }}
@@ -349,13 +391,13 @@ const handleTitleClick_P_B = () => {
               <el-row>
                 <el-col :span="6" v-for="(item, index) in items" :key="index">
                   <div style="display: flex;flex-direction: row;margin: 15px 15px 15px 0;">
-                    <img :src="avatar1" alt="icon" class="baIcon">
+                    <img :src="item.avaterUrl|| '@/assets/tieba.png'" alt="icon" class="baIcon">
                     <div style="display: flex;flex-direction: column;margin: 0 0 0 5px;">
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/tieba.png" alt="view icon"
                           style="width: 16px; height: 16px; margin-right: 4px;">
                         <span style="color: #d82100; cursor: pointer; text-decoration: none;"
-                          @click="handleTitleClick_RB" @mouseenter="item.showUnderline = true"
+                          @click="handleTitleClick_RB(item.boardId)" @mouseenter="item.showUnderline = true"
                           @mouseleave="item.showUnderline = false"
                           :style="{ textDecoration: item.showUnderline ? 'underline' : 'none', fontSize: '18px' }">
                           {{ item.name }}
@@ -388,12 +430,12 @@ const handleTitleClick_P_B = () => {
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
                       <span style="margin: 0 0 15px 0;color: #d82100; cursor: pointer; text-decoration: none;"
-                        @click="handleTitleClick_H_B" @mouseenter="art.showUnderline_B = true"
+                        @click="handleTitleClick_H_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                         @mouseleave="art.showUnderline_B = false"
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_H"
+                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_H(art)"
                         @mouseenter="art.showUnderline = true" @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
                         {{ art.title }}
@@ -488,7 +530,6 @@ const handleTitleClick_P_B = () => {
   height: 100%;
 
   /* 3. 图片填充策略：保持宽高比并完整显示 */
-  background-image: url('@/assets/xiaoxin.jpg');
   background-size: contain;
   /* 图片等比缩放填满容器 */
   background-repeat: no-repeat;

@@ -52,5 +52,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.getuserinfobyid(id);
     }
 
+    @Override
+    public Integer findPerPost() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer id = (Integer) map.get("id");
+        return userMapper.getPerPostCount(id);
+    }
+
 
 }

@@ -40,4 +40,10 @@ public class PostControl {
         return Result.success(cs);
     }
 
+    @GetMapping("/bapost")
+    public Result<List<Post>> getbapost(Integer id){
+        List<Post> cs= postService.getbapost(id);
+        return Result.success(cs);
+    }
+
 }

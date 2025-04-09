@@ -20,3 +20,10 @@ export const userRegisterService =(registerData)=>{
 export const findUser=()=>{
     return request.get('sb/user/currentuser');
 }
+
+export const findUserinfoByUserId= (id) =>{
+    return request.get('/sb/user/userinfo?id='+id);
+}
+export const findPerPost=()=>{
+    return request.get('sb/user/perpostcount');
+}

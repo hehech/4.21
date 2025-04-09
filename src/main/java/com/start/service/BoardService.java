@@ -11,4 +11,6 @@ public interface BoardService {
     List<Board> display();
 
     String findBoardNameById(Integer id);
+
+    Board findBoardinfoById(Integer id);
 }

@@ -6,3 +6,6 @@ export const getAllBoard = () => {
     return request.get('/sb/board');
 }
 
+export const getBoardInfoById= (id) =>{
+    return request.get('/sb/board/boardinfo?id='+id);
+}

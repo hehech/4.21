@@ -11,4 +11,5 @@ public interface PostService {
     List<Post> findPostById();
     Post getonepost(Integer id);
     List<Post> gethotbapost(Integer id);
+    List<Post> getbapost(Integer id);
 }

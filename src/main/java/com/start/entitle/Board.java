@@ -22,4 +22,6 @@ public class Board {
     private Long viewCount;
 
     private Long postCount;
+
+    private String avaterUrl;
 }
