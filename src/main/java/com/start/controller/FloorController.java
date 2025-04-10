@@ -23,7 +23,7 @@ public class FloorController {
     }
 
     @PostMapping("/addfloor")
-    public Result RegistControl(@RequestBody Floor floor) {
+    public Result addfloor(@RequestBody Floor floor) {
         //查询帖子
 
             //没有占用
