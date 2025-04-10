@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.start.mapper.CommentMapper">
+
+    <insert id="insert" parameterType="com.start.entitle.Comment">
+            insert into "comment"(
+                    "floor_id",
+                    "user_id",
+                    "parent_comment_id",
+                    "content",
+                    "create_time"
+            )
+            values (
+                    #{floorId},
+                    #{userId},
+                    #{parentCommentId},
+                    #{content},
+                    #{createTime}
+                   )
+    </insert>
+</mapper>
