@@ -19,6 +19,9 @@ public class CommentController {
     @GetMapping("/onefloor")
     public Result<List<Comment>> findCommentsByFloorId(Integer id){
         List<Comment> cs= commentService.findCommentsByFloorId(id);
+        for (Comment c:cs){
+            System.out.println(c.getCreateTime());
+        }
         return Result.success(cs);
     }
 

@@ -1,9 +1,12 @@
 spring:
   datasource:
-    url: jdbc:oracle:thin:@123.56.178.104:1521:orcl # 使用图片中的 SID "orcl"
+    url: jdbc:oracle:thin:@123.56.178.104:1521:orcl??serverTimezone=Asia/Shanghai # 使用图片中的 SID "orcl"
     username: worker                                # 用户名
     password: 1z2y3x4w                    # 密码（替换为实际值，建议加密）
     driver-class-name: oracle.jdbc.OracleDriver  # Oracle 驱动
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
 
 server:
   port: 7777

@@ -1,9 +1,6 @@
 package com.start.controller;
 
-import com.start.entitle.Floor;
-import com.start.entitle.Post;
-import com.start.entitle.Result;
-import com.start.entitle.User;
+import com.start.entitle.*;
 import com.start.service.FloorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +22,25 @@ public class FloorController {
     @PostMapping("/addfloor")
     public Result addfloor(@RequestBody Floor floor) {
         //查询帖子
-
             //没有占用
             System.out.println("查询成功");
             floorService.addfloor(floor);
             return Result.success();
-
     }
+
+    //分页条件查询
+    @GetMapping("/pagefloor")
+    public Result<PageBean<Floor>> findfloorsbypostidpage(
+            Integer pageNum,
+            Integer pageSize,
+            Integer Id
+    ){
+        PageBean<Floor> pb=floorService.findfloorsbypostidpage(pageNum,pageSize,Id);
+        return Result.success(pb);
+    }
+
+
+
+
+
 }

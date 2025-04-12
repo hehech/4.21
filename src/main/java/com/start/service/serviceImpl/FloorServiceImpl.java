@@ -1,6 +1,9 @@
 package com.start.service.serviceImpl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.start.entitle.Floor;
+import com.start.entitle.PageBean;
 import com.start.mapper.FloorMapper;
 import com.start.service.FloorService;
 import com.start.utils.ThreadLocalUtil;
@@ -37,5 +40,21 @@ public class FloorServiceImpl implements FloorService {
         floor.setLikeCount(0L);
         floor.setIsDeleted(0);
         floorMapper.addfloor(floor);
+    }
+
+    @Override
+    public PageBean<Floor> findfloorsbypostidpage(Integer pageNum, Integer pageSize, Integer id) {
+        //1.创建pageBean对象
+        PageBean<Floor> pb =new PageBean<>();
+        //2.开启分页查询
+        PageHelper.startPage(pageNum,pageSize);//开启后自动将 数据分页
+        //3.掉用mapper
+        List<Floor> as=floorMapper.findfloorsbypostid(id);
+        Page<Floor> p=(Page<Floor>)as;//强转时将查到的数据分页并 返回指定页到page中；
+        //4.把数据填充到pagebean对象中
+        pb.setTotal(p.getTotal());
+        pb.setItems(p.getResult());
+
+        return pb;
     }
 }

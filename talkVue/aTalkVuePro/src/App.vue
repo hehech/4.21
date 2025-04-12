@@ -1,5 +1,5 @@
 <script setup>
- import myinfoVue from './view/myinfo.vue';
+
 </script>
 
 <template>

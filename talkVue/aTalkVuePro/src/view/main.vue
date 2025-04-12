@@ -26,7 +26,7 @@ const handleAllSearch = () => {
 //热门吧展示
 const items = ref([
   {
-    boardId:1,avaterUrl: 'avatar1', name: '抗压背锅', viewCount: 575,
+    boardId: 1, avaterUrl: 'avatar1', name: '抗压背锅', viewCount: 575,
     showUnderline: false
   }
 ]);
@@ -40,22 +40,22 @@ getAllBoards();
 //点击事件
 const handleTitleClick_RB = (id) => {
   router.push({
-        path:"/board",
-        query: {
-            boardId: id
-        } 
-    });
+    path: "/board",
+    query: {
+      boardId: id
+    }
+  });
 }
 //===========================================================================================
 //登录信息显示
 const userinfo = ref({
-  avaterUrl:'',
+  avaterUrl: '',
   nickname: '',
   bio: '',
   vipGrade: '',
-  PostCount:1
+  PostCount: 1
 })
-import { findUser,findPerPost } from '@/api/user.js';
+import { findUser, findPerPost } from '@/api/user.js';
 const getUserInfo = async () => {
   try {
     // 1. 获取用户基本信息
@@ -85,7 +85,7 @@ const TurnToMyinf0 = () => {
 //文章内容
 const arts = ref([
   {
-    boardId: 1, postId:1,title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
+    boardId: 1, postId: 1, title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
     boardName: '',
     showUnderline_B: false
   }
@@ -128,20 +128,20 @@ const loadMore_H = () => {
 //title点击处理
 const handleTitleClick_H = (post) => {
   router.push({
-        path:"/post",
-        query: {
-            boardId: post.boardId,
-            postId:post.postId
-        } 
-    });
+    path: "/post",
+    query: {
+      boardId: post.boardId,
+      postId: post.postId
+    }
+  });
 }
 const handleTitleClick_H_B = (id) => {
   router.push({
-        path:"/board",
-        query: {
-            boardId: id
-        } 
-    });
+    path: "/board",
+    query: {
+      boardId: id
+    }
+  });
 }
 //===================================================================================================
 //个人最新动态
@@ -190,26 +190,57 @@ const loadMore_P = () => {
 //title点击处理
 const handleTitleClick_P = (post) => {
   router.push({
-        path:"/post",
-        query: {
-            boardId: post.boardId,
-            postId:post.postId
-        } 
-    });
+    path: "/post",
+    query: {
+      boardId: post.boardId,
+      postId: post.postId
+    }
+  });
 }
 const handleTitleClick_P_B = (id) => {
   router.push({
-        path:"/board",
-        query: {
-            boardId: id
-        } 
-    });
+    path: "/board",
+    query: {
+      boardId: id
+    }
+  });
 }
 //======================================================================================================
-const goToMyInfo=()=>{
+const goToMyInfo = () => {
   router.push("/myinfo");
 }
-
+//======================================================================================================================================================
+//热议信息显示
+const HotPostInfos = ref([
+  {
+    postId: 18, title: '你好', viewCount: 1,
+    showUnderline_hot: false, boardId: 2
+  }
+]);
+const getHotPosts = async () => {
+  try {
+    const result = await findPost();
+    if (result.data) {
+      console.log("API返回数据:", result.data); // 调试输出数据结构
+      HotPostInfos.value = result.data;
+      console.log("改变后返回数据:", HotPostInfos.value); // 调试输出数据结构
+    } else {
+      ElMessage.error("数据加载失败");
+    }
+  } catch (error) {
+    ElMessage.error("请求失败");
+  }
+}
+getHotPosts();
+const hotpostclick = (post) => {
+  router.push({
+    path: "/post",
+    query: {
+      boardId: post.boardId,
+      postId: post.postId
+    }  // 传递贴吧名称作为查询参数
+  });
+}
 
 
 
@@ -244,19 +275,6 @@ const goToMyInfo=()=>{
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-
-          <el-dropdown>
-            <el-button type="primary" icon="search">会员<el-icon
-                class="el-icon--right"><arrow-down /></el-icon></el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>会员升级</el-dropdown-item>
-                <el-dropdown-item>会员权限</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-
-
 
 
           <el-dropdown>
@@ -312,14 +330,15 @@ const goToMyInfo=()=>{
       <!-- 下侧区域 -->
       <div style="display: flex">
         <!-- 左侧内容区 -->
-        <el-card style="flex: 0.8;margin: 0 20px 20px 20px;">
+        <el-card style="flex: 0.21;margin: 0 20px 20px 20px;">
           <!-- 个人信息展示区 -->
           <el-card :data="userinfo" class="basicSS" style="display: flex; flex-direction: column;margin: 0 0 15px 0;">
 
             <div style="display: flex;">
               <!-- 用户头像区（左侧） -->
               <div style="display: flex; flex-direction: column;">
-                <el-avatar :src="userinfo.avaterUrl|| '@/assets/tieba.png'"class="custom-avatar" style="width: 110px; height: 110px;" @click="TurnToMyinf0"></el-avatar>
+                <el-avatar :src="userinfo.avaterUrl || '@/assets/tieba.png'" class="custom-avatar"
+                  style="width: 95px; height: 95px;" @click="TurnToMyinf0"></el-avatar>
                 <h4 style=" margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
 
@@ -360,8 +379,9 @@ const goToMyInfo=()=>{
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_P(art)"
-                        @mouseenter="art.showUnderline = true" @mouseleave="art.showUnderline = false"
+                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
+                        @click="handleTitleClick_P(art)" @mouseenter="art.showUnderline = true"
+                        @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
                         {{ art.title }}
                       </span>
@@ -379,8 +399,8 @@ const goToMyInfo=()=>{
           </div>
         </el-card>
 
-        <!-- 右侧推荐区 -->
-        <el-card style="flex: 3;margin: 0 20px 20px 0;">
+        <!-- 中间推荐区 -->
+        <el-card style="flex:0.57;margin: 0 20px 20px 0;">
           <!-- 热门话题 -->
           <div style="">
             <h3 style="margin: 0 0 5px 0; display: flex; align-items: center;">
@@ -391,7 +411,8 @@ const goToMyInfo=()=>{
               <el-row>
                 <el-col :span="6" v-for="(item, index) in items" :key="index">
                   <div style="display: flex;flex-direction: row;margin: 15px 15px 15px 0;">
-                    <img :src="item.avaterUrl|| '@/assets/tieba.png'" alt="icon" class="baIcon">
+                    <img :src="item.avaterUrl || '@/assets/tieba.png'" alt="icon" class="baIcon">
+
                     <div style="display: flex;flex-direction: column;margin: 0 0 0 5px;">
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/tieba.png" alt="view icon"
@@ -399,14 +420,14 @@ const goToMyInfo=()=>{
                         <span style="color: #d82100; cursor: pointer; text-decoration: none;"
                           @click="handleTitleClick_RB(item.boardId)" @mouseenter="item.showUnderline = true"
                           @mouseleave="item.showUnderline = false"
-                          :style="{ textDecoration: item.showUnderline ? 'underline' : 'none', fontSize: '18px' }">
+                          :style="{ fontSize: '16px', textDecoration: item.showUnderline ? 'underline' : 'none' }">
                           {{ item.name }}
                         </span>
                       </div>
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/renqi.png" alt="view icon"
                           style="width: 16px; height: 16px; margin-right: 4px;">
-                        <span>{{ item.viewCount }}</span>
+                        <span style="font-size: 12px;">{{ item.viewCount }}</span>
                       </div>
                     </div>
                   </div>
@@ -415,12 +436,12 @@ const goToMyInfo=()=>{
             </div>
           </div>
 
-          <!-- 热门动态 -->
+          <!-- 个性动态 -->
           <h3 style="margin: 10px 0 15px 0; display: flex; align-items: center;">
-              <img src="@/assets/dongtai.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 5px;">
-              热门动态
+            <img src="@/assets/dongtai.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 5px;">
+            个性动态
           </h3>
-
+          <!-- 个性动态部分 -->
           <div style="height: 400px; position: relative;">
             <!-- 使用 el-scrollbar 包裹卡片列表 -->
             <el-scrollbar ref="scrollbar_H" style="height: 100%;">
@@ -435,8 +456,9 @@ const goToMyInfo=()=>{
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;" @click="handleTitleClick_H(art)"
-                        @mouseenter="art.showUnderline = true" @mouseleave="art.showUnderline = false"
+                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
+                        @click="handleTitleClick_H(art)" @mouseenter="art.showUnderline = true"
+                        @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
                         {{ art.title }}
                       </span>
@@ -452,10 +474,35 @@ const goToMyInfo=()=>{
               </div>
             </el-scrollbar>
           </div>
-
-
         </el-card>
 
+        <!-- 热议榜区 -->
+        <el-card style="flex:0.22;background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);margin: 0 20px 20px 0;">
+          <h2
+            style="font-size: 18px; color: #333; margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
+            热议榜</h2>
+
+          <ol style="list-style: none; padding: 0; margin: 0;">
+            <li
+              style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5;"
+              v-for="post in HotPostInfos" :key="post.postId">
+              <div style="display: flex; align-items: center;">
+                <span
+                  style="font-size: 16px; font-weight: bold; color: #f85959; width: 20px; text-align: center; ">1</span>
+                <span style="font-size: 15px;color: #333;margin-left: 4px;cursor: pointer;text-decoration: none;
+                             display: inline-block;max-width: 220px;white-space: nowrap;overflow: hidden;
+                             text-overflow: ellipsis;"
+                              @mouseenter="post.showUnderline_hot = true" @mouseleave="post.showUnderline_hot = false"
+                             :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"
+                             @click="hotpostclick(post)">
+                  {{ post.title }}
+                </span>
+              </div>
+              <span style="font-size: 13px; color: #999;">{{ post.viewCount }}</span>
+            </li>
+
+          </ol>
+        </el-card>
       </div>
 
     </el-main>
@@ -510,8 +557,8 @@ const goToMyInfo=()=>{
   /* 1. 禁用默认圆形裁剪 */
   border-radius: 5px;
   overflow: hidden;
-  width: 100px;
-  height: 100px;
+  width: 70px;
+  height: 70px;
   /* 防止图片超出容器 */
 }
 

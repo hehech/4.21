@@ -42,8 +42,8 @@ import { findPostById } from '@/api/post.js'
 import { findUserinfoByUserId } from '@/api/user'
 const PostInfos = ref(
     {
-        postId: 18, title: '你好', content: '', floorNumber: 1, createTime: '',
-        userId: 22, UserName: '和', UserAvater: '', address: ''
+        postId: 18, title: '你好', content: '', createTime: '',
+        userId: 22, UserName: '和', UserAvater: '', address: '',
     }
 );
 const getOnePost = async (id) => {
@@ -70,20 +70,9 @@ const getOnePost = async (id) => {
     }
 };
 // 定义响应式变量
-const showReply = ref(false)
-const replyContent = ref('')
-const deviceInfo = ref('iPhone客户端')
-const currentTime = ref(
-    new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    }).replace(/\//g, '-')
-)
+const showReply_main = ref(false)
 const toggleReply = () => {
-    showReply.value = !showReply.value;
+    showReply_main.value = !showReply_main.value;
 }
 //===============================================================================================================================================
 //漏贴数据模型
@@ -106,7 +95,8 @@ const issue = async (post) => {
 import { findBaHotPosts } from '@/api/post.js'
 const HotPostInfos = ref([
     {
-        postId: 18, title: '你好', viewCount: 1
+        postId: 18, title: '你好', viewCount: 1,
+        showUnderline_hot: false
     }
 ]);
 const getBaHotPosts = async (id) => {
@@ -123,6 +113,20 @@ const getBaHotPosts = async (id) => {
         ElMessage.error("请求失败");
     }
 }
+const hotpostclick = (id) => {
+    const boardId = route.query.boardId;
+    router.replace({
+        path: "/post",
+        query: {
+            boardId: boardId,
+            postId: id
+        }
+    }).then(() => {
+        // 触发数据重新加载
+        getOnePost(id);
+        getLposts(id);
+    });
+}
 //================================================================================================================================================
 //楼贴信息展示
 import { findFloorByPostId } from '@/api/floor.js'
@@ -131,54 +135,16 @@ const Lpostinfos = ref([
         floorId: 1, postId: 1, floorNumber: 2, content: '', createTime: '',
         userId: 1, UserName: '', UserAvater: '', address: '',
 
-        showComment: false,
-
         showReply: false, // 新增：控制是否显示回复框
         replyContent: '', // 新增：存储回复内容
         deviceInfo: 'iPhone客户端', // 设备信息
 
         EmojiChooseShow: false,
-        showUnderline_Comment: false
+        showUnderline_Comment: false,
+
+        placeholder: ''
     }
 ]);
-const getlposts = async (id) => {
-    try {
-        const result = await findFloorByPostId(id);
-        if (!result.data) throw new Error("数据为空");
-
-        const updatedLpostinfos = await Promise.all(
-            result.data.map(async post => {
-                const userinfo = await findUserinfoByUserId(post.userId);
-                return {
-                    ...post,
-                    UserName: userinfo.data?.nickname || '未知名字',
-                    UserAvater: userinfo.data?.avaterUrl || '无头像url',
-                    address: userinfo.data?.address || '无地址'
-                };
-            })
-        );
-
-        Lpostinfos.value = updatedLpostinfos;
-    } catch (error) {
-        console.error('数据加载失败:', error);
-        Lpostinfos.value = [];
-    }
-};
-const ToggleReply = (floorId) => {
-    const post = Lpostinfos.value.find(p => p.floorId === floorId);
-    if (post) {
-        post.showReply = !post.showReply;
-        post.EmojiChooseShow = false;
-    }
-};
-const SubmitReply = (floorId) => {
-    const post = Lpostinfos.value.find(p => p.floorId === floorId);
-    if (!post || !post.replyContent.trim()) return;
-
-    console.log('回复内容:', post.replyContent, '帖子ID:', floorId);
-    post.replyContent = '';
-    post.showReply = false;
-};
 const showEmojiPicker = (floorId) => {
     const post = Lpostinfos.value.find(p => p.floorId === floorId);
     if (post) {
@@ -198,27 +164,37 @@ const onVue3EmojiPicker = (emoji, floorId) => {
 //评论显示
 const Commentinfo = ref([
     {
-        commentId:1,
-        floorId:1,
-        userId:1,
-        parentCommentId:1,
-        content:'',
-        createTime:'',
-        
-        UserName:'',UserAvaterUrl:'',parentCommentUserName:''
+        commentId: 1,
+        floorId: 1,
+        userId: 1,
+        parentCommentId: 1,
+        content: '',
+        createTime: '',
+
+        UserName: '', UserAvaterUrl: '', parentCommentUserName: '',
+        showUnderline_Answer: false
     }
 ])
-import {findCommentsByFloorId} from '@/api/comment.js'
+import { findCommentsByFloorId } from '@/api/comment.js'
 const ShowComment = async (floorId) => {
     const post = Lpostinfos.value.find(p => p.floorId === floorId);
     if (post) {
-        post.showComment = !post.showComment;
+        // 关闭其他已打开的回复框
+        Lpostinfos.value
+            .filter(item => item.showReply && item.floorId !== floorId)
+            .forEach(item => {
+                item.showReply = false;
+                item.EmojiChooseShow = false;
+            });
+        // 切换当前帖子的状态
         post.showReply = !post.showReply;
         post.EmojiChooseShow = false;
+        post.placeholder = "请输入内容..."
     }
     try {
         const result = await findCommentsByFloorId(floorId);
         if (!result.data) throw new Error("数据为空");
+        console.log("评论返回的数据：", result.data);
 
         const updatedCommentinfo = await Promise.all(
             result.data.map(async comt => {
@@ -231,10 +207,14 @@ const ShowComment = async (floorId) => {
             })
         );
 
+        // 对评论按 createTime 升序排序
+        updatedCommentinfo.sort((a, b) => {
+            return new Date(a.createTime) - new Date(b.createTime);
+        });
         // 新增：处理父评论用户名
         updatedCommentinfo.forEach(comment => {
             if (comment.parentCommentId) {
-                const parentComment = updatedCommentinfo.find(c => 
+                const parentComment = updatedCommentinfo.find(c =>
                     c.commentId === comment.parentCommentId
                 );
                 if (parentComment) {
@@ -253,26 +233,93 @@ const ShowComment = async (floorId) => {
 }
 //=================================================================================================================================================
 //评论模型
-const CommentModel=ref(
+const CommentModel = ref(
     {
-        floorId:1,
-        parentCommentId:2,
-        content:''
+        floorId: 1,
+        parentCommentId: 2,
+        content: ''
     }
 )
 
 import { Addcomment } from '@/api/comment.js'
-const issueComment = async (id) => {
-    CommentModel.value = { ...CommentModel.value, floorId: id };
-    // 去除HTML标签
-    //floorModel.value.content = floorModel.value.content.replace(/<[^>]*>/g, '');
+const issueComment = async (post) => {
+    CommentModel.value = { ...CommentModel.value, floorId: post.floorId };
+
+
     let rs = await Addcomment(CommentModel.value);
     ElMessage.success(rs.msg ? rs.msg : '发表成功');
-    await ShowComment(id);
-    CommentModel.value=[];
+    await ShowComment(post.floorId);
+    CommentModel.value = [];
+    post.placeholder = "请输入内容..."
 };
+const CommentAnswer = (comt, post) => {
+    CommentModel.value = { ...CommentModel.value, parentCommentId: comt.commentId };
+    post.placeholder = `回复 ${comt.UserName}：`;
+}
+//======================================================================================================================================================
+//分页器设置
+//分页条数据模型
+const pageNum = ref(1)//当前页
+const total = ref(10)//总条数
+const pageSize = ref(2)//每页条数
+// 修改分页处理函数
+const onSizeChange = (size) => {
+    pageSize.value = size;
+    const postId = route.query.postId
+    getLposts(postId);  // 添加数据加载
+}
+
+const onCurrentChange = (num) => {
+    pageNum.value = num;
+    const postId = route.query.postId
+    getLposts(postId);  // 添加数据加载
+}
+import { getLpostsPage } from '@/api/floor.js'
+const getLposts = async (id) => {
+    try {
+        let params = {
+            pageNum: pageNum.value,
+            pageSize: pageSize.value,
+            Id: id  // 修正引用方式
+        }
+
+        const result = await getLpostsPage(params);
+        console.log("返回的分页数据：", result.data)
+        if (!result?.data) throw new Error("数据为空");
+
+        const updatedLpostinfos = await Promise.all(
+            result.data.items.map(async post => {
+                const userinfo = await findUserinfoByUserId(post.userId);
+                return {
+                    ...post,
+                    UserName: userinfo.data?.nickname || '未知名字',
+                    UserAvater: userinfo.data?.avaterUrl || '无头像url',
+                    address: userinfo.data?.address || '无地址'
+                };
+            })
+        );
+
+        Lpostinfos.value = updatedLpostinfos.sort((a, b) => a.floorNumber - b.floorNumber);
+        total.value = result.data.total;  // 移到try块内
+    } catch (error) {
+        console.error('数据加载失败:', error);
+        Lpostinfos.value = [];
+        total.value = 0;  // 出错时重置总数
+    }
+}
 
 
+
+
+
+
+
+
+
+
+
+
+//======================================================================================================================================================
 
 //接受外界面变量；
 onMounted(async () => {
@@ -288,7 +335,7 @@ onMounted(async () => {
     console.log("查询的 post_id:", postId);
     if (postId) {
         getOnePost(postId);
-        getlposts(postId);
+        getLposts(postId);
     } else { ElMessage.error("无boardId"); }
 })
 
@@ -366,12 +413,6 @@ onMounted(async () => {
                             +关注
                         </el-button>
                     </div>
-
-                    <!-- 右侧签到按钮 -->
-                    <el-button type="primary" size="small"
-                        style="height: 28px; line-height: 28px; padding: 0 10px; flex-shrink: 0;">
-                        签到
-                    </el-button>
                 </div>
                 <!-- 分页器部分 -->
                 <div
@@ -379,42 +420,10 @@ onMounted(async () => {
                     <!-- 分页主体 -->
                     <div style="display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between;">
                         <!-- 左侧分页内容 -->
-                        <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                            <!-- 页码列表 -->
-                            <div style="display: flex; align-items: center; margin-right: 20px;">
-                                <span
-                                    style="margin: 0 5px; padding: 3px 8px; border-radius: 2px; background: #06aedc; color: white;">1</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">2</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">3</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">4</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">5</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">6</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">7</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">8</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">9</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">10</span>
-                                <span style="margin: 0 5px; padding: 3px 8px;">下一页</span>
-                                <span
-                                    style="margin-left: 10px; padding: 3px 10px; border: 1px solid #ddd; border-radius: 2px;">尾页</span>
-                            </div>
-
-                            <!-- 统计信息 -->
-                            <div style="margin-right: 20px; font-size: 14px; color: #666;">
-                                <span style="margin-right: 15px;">3487回复贴</span>
-                                <span>共116页</span>
-                            </div>
-
-                            <!-- 跳转输入 -->
-                            <div style="display: flex; align-items: center; font-size: 14px;">
-                                <span style="margin-right: 5px; color: #666;">跳到</span>
-                                <input type="text"
-                                    style="width: 50px; height: 24px; padding: 0 5px; margin-right: 5px; border: 1px solid #ddd; border-radius: 2px;">
-                                <span style="margin-right: 5px; color: #666;">页</span>
-                                <button
-                                    style="padding: 0 10px; height: 24px; background: #06aedc; color: white; border: none; border-radius: 2px;">确定</button>
-                            </div>
-                        </div>
-
+                        <el-pagination v-model:current-page="pageNum" v-model:page-size="pageSize"
+                            :page-sizes="[2, 4, 6, 8]" layout="jumper, total, sizes, prev, pager, next" background
+                            :total="total" @size-change="onSizeChange" @current-change="onCurrentChange"
+                            style="justify-content: flex-end" />
                         <!-- 右侧返回按钮 -->
                         <div>
                             <a style="color: #06aedc; text-decoration: none; font-size: 14px;" @click="goBack">
@@ -428,11 +437,15 @@ onMounted(async () => {
                 <div style="display: flex;flex-direction: row;">
                     <div style="flex:0.7">
                         <!-- 帖子内容区域 -->
-                        <div style="display: flex;max-width:1015px;margin-top: 1px; background-color: white;position: relative;"
+                        <div style="display: flex;margin-top: 1px; background-color: white;position: relative;"
                             v-for="post in PostInfos" :key="post.postId">
                             <!-- 帖子标题和作者信息 -->
                             <div
                                 style="flex:0.14; display: flex; flex-direction: column; align-items: center;background-color: #f5ffff;">
+                                <div class="badge-triangle">
+                                    <span class="badge-text1">主</span>
+                                    <span class="badge-text2">贴</span>
+                                </div>
                                 <div style="display: flex; justify-content: center;margin:20px 0 0 0">
                                     <img :src="post.UserAvater || '@/assets/tieba.png'" alt="作者头像"
                                         style="width: 90px; height: 90px;">
@@ -469,8 +482,7 @@ onMounted(async () => {
                                     <div style="display: flex; align-items: center;">
                                         <div
                                             style="font-size: 12px; color: #999; display: flex; align-items: center;margin:0 15px 0 0">
-                                            <span style="margin: 0 10px 0 0; font-weight: bold;">{{ post.floorNumber
-                                                }}楼</span>
+                                            <span style="margin: 0 10px 0 0; font-weight: bold;">1楼</span>
                                             <span>地址：{{ post.address }}</span>
                                             <span style="margin: 0 5px;"></span>
 
@@ -484,7 +496,7 @@ onMounted(async () => {
                                     </div>
                                 </div>
                                 <!-- 回复输入框（默认隐藏） -->
-                                <div v-if="showReply" class="editor" style="margin-top: 15px;" :model="floorModel">
+                                <div v-if="showReply_main" class="editor" style="margin-top: 15px;" :model="floorModel">
                                     <h3 style="margin: 10px 0 10px 10px;">
                                         发表回复
                                     </h3>
@@ -498,7 +510,7 @@ onMounted(async () => {
 
                         </div>
                         <!-- 楼层帖子区域 -->
-                        <div style="display: flex;max-width:1015px;margin-top: 1px; background-color: white;position: relative;"
+                        <div style="display: flex;margin-top: 1px; background-color: white;position: relative;"
                             v-for="post in Lpostinfos" :key="post.floorId">
                             <!-- 帖子标题和作者信息 -->
                             <div
@@ -535,7 +547,7 @@ onMounted(async () => {
                                         <div
                                             style="font-size: 12px; color: #999; display: flex; align-items: center;margin:0 15px 0 0">
                                             <span style="margin:0 10px 0 0; font-weight: bold;">{{ post.floorNumber
-                                            }}楼</span>
+                                                }}楼</span>
                                             <span>地址：{{ post.address }}</span>
                                             <span style="margin: 0 5px;"></span>
 
@@ -556,12 +568,12 @@ onMounted(async () => {
                                     </div>
                                 </div>
                                 <!-- 评论显示 -->
-                                <div v-if="post.showComment" v-for="comt in Commentinfo" :key="comt.commentId"
+                                <div v-if="post.showReply" v-for="comt in Commentinfo" :key="comt.commentId"
                                     style=" background: #f5f5f5; border-radius: 4px; padding: 12px;">
                                     <div style="display: flex;">
                                         <!-- 头像 -->
                                         <el-avatar style="width: 50px; height: 50px; margin-right: 12px;" shape="square"
-                                        :src="comt.UserAvaterUrl || '@/assets/tieba.png'" />
+                                            :src="comt.UserAvaterUrl || '@/assets/tieba.png'" />
 
                                         <!-- 评论内容 -->
                                         <div style="flex: 1;">
@@ -569,7 +581,7 @@ onMounted(async () => {
                                             <div style="display: flex; margin:10px 0 0 0; align-items: flex-start;">
                                                 <span
                                                     style="font-size: 16px; font-weight: 600; color: #008080; margin-right: 5px; white-space: nowrap;">
-                                                    {{comt.UserName}}
+                                                    {{ comt.UserName }}
                                                 </span>
                                                 <div v-if="comt.parentCommentId"
                                                     style="font-size: 14px; color: #333333; line-height: 1.5; margin-bottom: 8px; word-wrap: break-word;">
@@ -577,7 +589,7 @@ onMounted(async () => {
                                                 </div>
                                                 <span v-if="comt.parentCommentId"
                                                     style="font-size: 16px; font-weight: 600; color: #008080; margin-right: 5px; white-space: nowrap;">
-                                                    {{comt.parentCommentUserName}}
+                                                    {{ comt.parentCommentUserName }}
                                                 </span>
                                                 <div
                                                     style="font-size: 14px; color: #333333; line-height: 1.5; margin-bottom: 8px; word-wrap: break-word;">
@@ -588,9 +600,13 @@ onMounted(async () => {
                                             <!-- 操作按钮和时间（靠右对齐） -->
                                             <div
                                                 style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-                                                <span style="font-size: 12px; color: #999999;">{{ comt.createTime }}</span>
-                                                <el-button style="font-size: 12px; color: #666666; padding: 0;"
-                                                     link>
+                                                <span style="font-size: 12px; color: #999999;">{{ comt.createTime
+                                                    }}</span>
+                                                <el-button style="font-size: 12px; color: #666666; padding: 0;text-decoration: none;
+                                                 cursor: pointer;" link @mouseenter="comt.showUnderline_Answer = true"
+                                                    @mouseleave="comt.showUnderline_Answer = false"
+                                                    :style="{ textDecoration: comt.showUnderline_Answer ? 'underline' : 'none' }"
+                                                    @click="CommentAnswer(comt, post)">
                                                     回复
                                                 </el-button>
                                             </div>
@@ -604,7 +620,8 @@ onMounted(async () => {
 
                                     <!-- 回复输入区域 -->
                                     <div style="position: relative;">
-                                        <textarea v-model="CommentModel.content" placeholder="输入回复内容..."
+                                        <textarea v-model="CommentModel.content"
+                                            :placeholder="post.placeholder || '输入回复内容...'"
                                             style="width: 98%; min-height: 30px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
 
                                         <!-- 表情和发表按钮 -->
@@ -615,7 +632,7 @@ onMounted(async () => {
                                                 <img src="@/assets/tieba.png" alt="表情"
                                                     style="width: 20px; height: 20px;">
                                             </button>
-                                            <button @click="issueComment(post.floorId)"
+                                            <button @click="issueComment(post)"
                                                 style="margin-left: 15px; background: #06aedc; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">
                                                 发表
                                             </button>
@@ -627,6 +644,19 @@ onMounted(async () => {
                             </div>
 
                         </div>
+                        <!-- 分页器部分 -->
+                        <div
+                            style="font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; padding: 10px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <!-- 分页主体 -->
+                            <div
+                                style="display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between;">
+                                <!-- 左侧分页内容 -->
+                                <el-pagination v-model:current-page="pageNum" v-model:page-size="pageSize"
+                                    :page-sizes="[2, 4, 6, 8]" layout="jumper, total, sizes, prev, pager, next"
+                                    background :total="total" @size-change="onSizeChange"
+                                    @current-change="onCurrentChange" style="justify-content: flex-end" />
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 热度排行榜区域 -->
@@ -635,16 +665,22 @@ onMounted(async () => {
                             style="font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 15px;margin:1px 0 0 1px">
                             <h2
                                 style="font-size: 18px; color: #333; margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
-                                贴吧热议榜</h2>
+                                热议榜</h2>
 
                             <ol style="list-style: none; padding: 0; margin: 0;">
                                 <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5;"
                                     v-for="post in HotPostInfos" :key="post.postId">
                                     <div style="display: flex; align-items: center;">
                                         <span
-                                            style="font-size: 16px; font-weight: bold; color: #f85959; width: 24px; text-align: center;">1</span>
-                                        <span style="font-size: 15px; color: #333; margin-left: 8px;">{{ post.title
-                                        }}</span>
+                                            style="font-size: 16px; font-weight: bold; color: #f85959; width: 24px; text-align: center; ">1</span>
+                                        <span style="font-size: 15px; color: #333; margin-left: 8px;
+                                            cursor: pointer;text-decoration: none;"
+                                            @mouseenter="post.showUnderline_hot = true"
+                                            @mouseleave="post.showUnderline_hot = false"
+                                            :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"
+                                            @click="hotpostclick(post.postId)">{{
+                                                post.title
+                                            }}</span>
                                     </div>
                                     <span style="font-size: 13px; color: #999;">{{ post.viewCount }}</span>
                                 </li>
@@ -730,5 +766,38 @@ onMounted(async () => {
     background: white;
     border-top: 1px solid #ddd;
     z-index: 5;
+}
+
+.badge-triangle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 0 60px 60px 0;
+    border-color: transparent #1E90FF transparent transparent;
+}
+
+.badge-text1 {
+    position: absolute;
+    left: 28px;
+    top: -3px;
+    right: 0;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    transform: rotate(45deg);
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.badge-text2 {
+    position: absolute;
+    left: 41px;
+    top: 11px;
+    right: 0;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    transform: rotate(45deg);
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
 }
 </style>

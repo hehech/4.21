@@ -8,3 +8,9 @@ export const findFloorByPostId= (id) =>{
 export const Addfloor =(data)=>{
     return request.post('/sb/floor/addfloor',data);
 }
+
+
+// 文章列表查询
+export const getLpostsPage=(params)=>{
+    return request.get('/sb/floor/pagefloor',{params:params})
+}
