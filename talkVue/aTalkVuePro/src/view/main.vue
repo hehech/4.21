@@ -244,15 +244,17 @@ const hotpostclick = (post) => {
 
 
 
+
+
+
 </script>
 
 
 <template>
-  <el-container style="height: 100vh;">
-    <!-- 背景 -->
-    <!-- <Particles id="tsparticles" class="bg1" :options="options" /> -->
+  <el-container class="toubu"style="height: 100vh;">
     <!-- 头部区域 -->
-    <el-header class="basicSS" style="display: flex; justify-content: space-between; align-items: center;">
+    <el-header
+      style="display: flex; justify-content: space-between; align-items: center;">
       <!-- 左侧导航内容 -->
       <div>
         <el-breadcrumb style="font-size: 16px;">
@@ -265,26 +267,25 @@ const hotpostclick = (post) => {
         <el-button-group>
 
           <el-dropdown>
-            <el-button type="primary" icon="search">我的<el-icon
-                class="el-icon--right"><arrow-down /></el-icon></el-button>
+            <el-button class="anniu-wode" type="primary">我的<el-icon><arrow-down /></el-icon></el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>我的关注</el-dropdown-item>
-                <el-dropdown-item>我的贴吧</el-dropdown-item>
-                <el-dropdown-item @click="goToMyInfo">我的主页</el-dropdown-item>
+                <el-dropdown-item divided>我的贴吧</el-dropdown-item>
+                <el-dropdown-item divided @click="goToMyInfo">我的主页</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
 
 
           <el-dropdown>
-            <el-button type="primary" icon="user">更多<el-icon class="el-icon--right"><arrow-down /></el-icon></el-button>
+            <el-button class="anniu-wode" type="primary">更多<el-icon><arrow-down /></el-icon></el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>账号设置</el-dropdown-item>
-                <el-dropdown-item>问题反馈</el-dropdown-item>
+                <el-dropdown-item divided>问题反馈</el-dropdown-item>
                 <el-dropdown-item divided>切换账号</el-dropdown-item>
-                <el-dropdown-item>退出登录</el-dropdown-item>
+                <el-dropdown-item divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -293,32 +294,34 @@ const hotpostclick = (post) => {
     </el-header>
 
     <!-- 主要内容区 -->
-    <el-main style="display: flex;flex-direction: column;">
+    <el-main 
+      style="display: flex;flex-direction: column;">
       <!-- 搜索区 -->
-      <div class="basicSS" style="display: flex; justify-content: center; margin: 0 20px 20px 20px;">
+      <div class="Sousuo"
+        style="display: flex; justify-content: center; margin: 0 20px 20px 20px;">
         <!-- 品牌标识区 -->
-        <div style="display: flex;">
+        <div style="display: flex;margin-top:">
           <span>
-            <span style="font-size: 24px; color: #FF3B30; font-weight: bold;">科技</span>
-            <span style="font-size: 20px; color: #1E90FF; vertical-align: sub;">贴吧</span>
+            <span style="font-size: 24px; color: #ff0041; font-weight: bold;">Talkto</span>
+            <span style="font-size: 20px; color: #ffc700; vertical-align: sub;">World</span>
           </span>
         </div>
 
         <!-- 搜索主体区-->
         <div style="display: flex;">
           <el-form>
-            <el-row :gutter="10" style="display: flex;">
+            <el-row style="display: flex;">
               <!-- 搜索框列（响应式宽度） -->
-              <el-col :xs="22" :sm="18" :md="16">
-                <el-input placeholder="请输入关键词..." clearable style="width: 100%;" @focus="handleInputFocus" />
+              <el-col :xs="20" :sm="18" :md="16">
+                <input class="shurukuang" placeholder="请输入关键词..." @focus="handleInputFocus" />
               </el-col>
 
               <!-- 操作按钮列（固定宽度） -->
-              <el-col :xs="4" :sm="6" :md="8" style="display: flex; flex-direction: row;">
-                <el-button type="primary" size-type="medium" style="width: 100%;">
+              <el-col :xs="4" :sm="6" :md="8" style="display: flex; flex-direction: row;margin-left: -45px;">
+                <el-button class="anniu-sousuo"size-type="medium" style="width: 100%;">
                   进入贴吧
                 </el-button>
-                <el-button type="success" size-type="medium" style="width: 100%;">
+                <el-button class="anniu-sousuo"size-type="medium" style="width: 100%;">
                   全吧搜索
                 </el-button>
               </el-col>
@@ -328,34 +331,34 @@ const hotpostclick = (post) => {
       </div>
 
       <!-- 下侧区域 -->
-      <div style="display: flex">
+      <div style="display: flex;">
         <!-- 左侧内容区 -->
-        <el-card style="flex: 0.21;margin: 0 20px 20px 20px;">
+        <el-card class="gerenxinxi"style="flex: 0.21;margin: 0 20px 20px 20px;">
           <!-- 个人信息展示区 -->
-          <el-card :data="userinfo" class="basicSS" style="display: flex; flex-direction: column;margin: 0 0 15px 0;">
+          <el-card class="touxiang" :data="userinfo" style="display: flex; flex-direction: column;margin: 0 0 15px 0;">
 
             <div style="display: flex;">
               <!-- 用户头像区（左侧） -->
               <div style="display: flex; flex-direction: column;">
                 <el-avatar :src="userinfo.avaterUrl || '@/assets/tieba.png'" class="custom-avatar"
                   style="width: 95px; height: 95px;" @click="TurnToMyinf0"></el-avatar>
-                <h4 style=" margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
+                <h4 style="color:#013a3c;margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
 
               <!-- VIP信息区（右侧） -->
               <div style="display: flex; flex-direction: column;margin: 0 0 0 15px;">
-                <div style="margin-bottom: 12px;">
+                <div style="color:#013a3c;margin-bottom: 12px;">
                   VIP：{{ userinfo.vipGrade }}
                 </div>
-                <div style="margin-bottom: 12px;">
+                <div style="color:#013a3c;margin-bottom: 12px;">
                   帖子：{{ userinfo.PostCount }}
                 </div>
-                <div>
+                <div style="color:#013a3c;">
                   粉丝：567
                 </div>
               </div>
             </div>
-            <div class="profile-content" style="width: 100%;">
+            <div class="jianjieziti" style="width: 100%;">
               <p>{{ userinfo.bio }}
               </p>
             </div>
@@ -370,7 +373,7 @@ const hotpostclick = (post) => {
             <el-scrollbar ref="scrollbar_P" style="height: 100%;">
               <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
               <div v-for="(art, index) in visibleParts" :key="index">
-                <el-card style="background: #f8fafc; margin: 0 0 15px 0;">
+                <el-card  class="zuixinka"style="margin: 0 0 15px 0;">
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
                       <span style="margin: 0 0 15px 0;color: #01888D; cursor: pointer; text-decoration: none;"
@@ -400,9 +403,9 @@ const hotpostclick = (post) => {
         </el-card>
 
         <!-- 中间推荐区 -->
-        <el-card style="flex:0.57;margin: 0 20px 20px 0;">
+        <div class="zhongjiantuijian"style="flex:0.57;margin: 0 20px 20px 0;padding: 20px;">
           <!-- 热门话题 -->
-          <div style="">
+          <div style="margin-left: 6px;">
             <h3 style="margin: 0 0 5px 0; display: flex; align-items: center;">
               <img src="@/assets/remen.png" alt="view icon" style="width: 18px; height: 18px; margin-right: 4px;">
               热门话题
@@ -417,7 +420,7 @@ const hotpostclick = (post) => {
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/tieba.png" alt="view icon"
                           style="width: 16px; height: 16px; margin-right: 4px;">
-                        <span style="color: #d82100; cursor: pointer; text-decoration: none;"
+                        <span style="color:#001164; cursor: pointer; text-decoration: none;"
                           @click="handleTitleClick_RB(item.boardId)" @mouseenter="item.showUnderline = true"
                           @mouseleave="item.showUnderline = false"
                           :style="{ fontSize: '16px', textDecoration: item.showUnderline ? 'underline' : 'none' }">
@@ -437,20 +440,20 @@ const hotpostclick = (post) => {
           </div>
 
           <!-- 个性动态 -->
-          <h3 style="margin: 10px 0 15px 0; display: flex; align-items: center;">
+          <h3 style="margin: 10px 0 15px 6px; display: flex; align-items: center;">
             <img src="@/assets/dongtai.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 5px;">
             个性动态
           </h3>
           <!-- 个性动态部分 -->
-          <div style="height: 400px; position: relative;">
+          <div style="height: 400px; position: relative;margin-left: 6px;">
             <!-- 使用 el-scrollbar 包裹卡片列表 -->
             <el-scrollbar ref="scrollbar_H" style="height: 100%;">
               <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
               <div v-for="(art, index) in visibleArts" :key="index">
-                <el-card style="background: #f8fafc; margin: 0 0 15px 0;">
+                <el-card class="gexign"style="margin: 0 0 15px 0;">
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
-                      <span style="margin: 0 0 15px 0;color: #d82100; cursor: pointer; text-decoration: none;"
+                      <span style="margin: 0 0 15px 0;color: #580099; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_H_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                         @mouseleave="art.showUnderline_B = false"
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
@@ -474,12 +477,12 @@ const hotpostclick = (post) => {
               </div>
             </el-scrollbar>
           </div>
-        </el-card>
+        </div>
 
         <!-- 热议榜区 -->
-        <el-card style="flex:0.22;background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);margin: 0 20px 20px 0;">
+        <div class="reyi"style="flex:0.22;box-shadow: 0 1px 3px rgba(0,0,0,0.1);margin: 0 20px 20px 0;padding:20px">
           <h2
-            style="font-size: 18px; color: #333; margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
+            style="font-size: 18px; color: #333; margin: 0 0 10px 0; padding-bottom: 10px;">
             热议榜</h2>
 
           <ol style="list-style: none; padding: 0; margin: 0;">
@@ -491,10 +494,10 @@ const hotpostclick = (post) => {
                   style="font-size: 16px; font-weight: bold; color: #f85959; width: 20px; text-align: center; ">1</span>
                 <span style="font-size: 15px;color: #333;margin-left: 4px;cursor: pointer;text-decoration: none;
                              display: inline-block;max-width: 220px;white-space: nowrap;overflow: hidden;
-                             text-overflow: ellipsis;"
-                              @mouseenter="post.showUnderline_hot = true" @mouseleave="post.showUnderline_hot = false"
-                             :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"
-                             @click="hotpostclick(post)">
+                             text-overflow: ellipsis;" @mouseenter="post.showUnderline_hot = true"
+                  @mouseleave="post.showUnderline_hot = false"
+                  :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"
+                  @click="hotpostclick(post)">
                   {{ post.title }}
                 </span>
               </div>
@@ -502,41 +505,168 @@ const hotpostclick = (post) => {
             </li>
 
           </ol>
-        </el-card>
+        </div>
       </div>
 
     </el-main>
 
-    <!-- 底部功能区 -->
-    <el-footer style="background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
-
-    </el-footer>
   </el-container>
 </template>
 
 
 
 <style scoped>
-.profile-content p {
+.Sousuo {
+  padding: 10px;
+  border: 2px solid #018e93;
+  /* 绿色边框 */
+  border-radius: 12px;
+  /* 圆角 */
+  box-shadow: 0 4px 8px rgba(2, 133, 156, 0.2);
+  /* 阴影 */
+}
+
+:deep(.el-breadcrumb__item) {
+  font-size: 18px;
+}
+
+:deep(.el-breadcrumb__inner) {
+  color: #0881fb;
+  transition: all 0.3s;
+}
+
+:deep(.el-breadcrumb__item:hover .el-breadcrumb__inner) {
+  color: #adfcad;
+}
+
+.anniu-wode {
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  padding: 12px 24px !important;
+
+  background: linear-gradient(135deg, #84e2f5 0%, #8fd3f4 100%) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.anniu-wode:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 下拉菜单优化 */
+:deep(.el-dropdown-menu) {
+  background: #06eab8 !important;
+  border: 1px solid #016f22;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.el-dropdown-menu__item) {
+  color: #0080cf;
+  font-weight: 500;
+
+  &:hover {
+    background: #c0fef9 !important;
+  }
+}
+
+/* 搜索框优化 */
+/* 同时修改外层容器和内部输入框 */
+.shurukuang {
+  margin:0 0 0 8px;
+  background:linear-gradient(120deg, #99f5ba 0%, #9cd7f5 100%);
+  border: 1px solid #018e93;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+
+/* 搜索框右侧按钮 */
+.anniu-sousuo {
+  color: #00ae97 ;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  padding: 12px 24px !important;
+
+  background:linear-gradient(120deg, #90edd7 0%, #a4e2e9 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.anniu-sousuo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 个人信息区 */
+.gerenxinxi{
+  background-image: linear-gradient(120deg, #84fab0 0%, #76d7bc 100%);
+  border: 2px solid #018e93;
+  border-radius: 8px;
+}
+
+/* 头像区*/
+.touxiang{
+  background-image: linear-gradient(120deg, #b6ffd1 0%, #7ae1a7 100%);
+  border: 1px solid #018e93;
+  border-radius: 8px;
+}
+
+
+.jianjieziti{
   font-size: 13px;
   /* 调整字体大小 */
-  color: #333;
+  color: #013e39;
 }
+
+.zuixinka{
+  background-image: linear-gradient(120deg, #b6ffd1 0%, #7ae1a7 100%);
+  border: 1px solid #018e93;
+  border-radius: 8px;
+}
+
+.zhongjiantuijian{
+  /* background-image: linear-gradient(120deg, #8bebc3 0%, #6fd6ed 100%); */
+  border: 1px solid #018e93;
+  border-radius: 8px;
+}
+
+.toubu{
+  background-image: linear-gradient(120deg, #83f9ae 0%, #6fc3ed 100%);
+    /* 自定义滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: #6fd6ed #6fd6ed;
+}
+
+.gexign{
+  background-image: linear-gradient(120deg, #8bebc3 0%, #6fd6ed 100%);
+  border: 1px solid #018e93;
+  border-radius: 8px;
+}
+.reyi{
+  border: 1px solid #018e93;
+  border-radius: 8px;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 .icon {
   width: 50px;
   height: 50px;
 }
 
-
-
-
-
 .basicSS {
   background: #ffffff;
 }
-
-
 
 /* 动态卡片样式优化 */
 .post-card {

@@ -91,10 +91,10 @@ const options = {
   },
   particles: {
     color: {
-      value: '#01FCCA' // 粒子点的颜色
+      value: '#00ffb1' // 粒子点的颜色
     },
     links: {
-      color: '#03EDF6', // 线条颜色
+      color: '#00ffb1', // 线条颜色
       distance: 150,//线条距离
       enable: true,
       opacity: 0.5, // 不透明度
@@ -176,7 +176,7 @@ const options = {
   width: 100%;
   background-size: cover;
   background-repeat: no-repeat;
-  background-image: url('@/assets/bg1.jpg');
+  background-image: url('@/assets/allbg.jpg');
   opacity: 0.9;
   position: fixed;
   pointer-events: none;
@@ -192,12 +192,12 @@ const options = {
   /*实现块元素百分比下居中*/
   width: 450px;
   padding: 50px;
-  background: rgba(0, 26, 27, 0.418);
+  background: rgba(85, 255, 224, 0.418);
   /*背景颜色为黑色，透明度为0.8*/
   box-sizing: border-box;
   /*box-sizing设置盒子模型的解析模式为怪异盒模型，
     将border和padding划归到width范围内*/
-  box-shadow: 0px 10px 25px rgba(0, 130, 97, 0.5);
+  box-shadow: 0px 10px 25px rgba(0, 16, 16, 0.5);
   /*边框阴影  水平阴影0 垂直阴影15px 模糊25px 颜色黑色透明度0.5*/
   border-radius: 15px;
   /*边框圆角，四个角均为15px*/
@@ -206,7 +206,7 @@ const options = {
 h2 {
   margin: 0 0 30px;
   padding: 0;
-  color: #79f9db;
+  color: #339887;
   text-align: center;
   /*文字居中*/
 }
