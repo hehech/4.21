@@ -300,10 +300,9 @@ onUnmounted(() => {
       </div>
     </el-header>
 
-    <!-- 主要内容区 -->
     <!-- 搜索区 -->
     <div
-      style="position: relative; height: 330px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      style="position: relative; height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
       <!-- 视频背景 -->
       <video autoplay muted loop playsinline
         style="position: absolute;top: 0;left: 0;  width: 100% !important;height: 100% !important;object-fit: cover;z-index: 1;">
@@ -312,14 +311,34 @@ onUnmounted(() => {
 
       <!-- 内容容器 - 添加半透明背景确保文字可读性 -->
       <div style="padding: 20px;margin-bottom: 15px;z-index: 1;">
-        <span style="font-size: 30px;font-weight: bold;background-color: #ffffff;
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    color: transparent;">Talkto</span>
-        <span style="font-size: 30px;font-weight: bold;background-color: #ffffff;
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    color: transparent;vertical-align: sub;">World</span>
+        <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Kalam:wght@700&display=swap"
+          rel="stylesheet">
+
+        <span style="font-family: 'Dancing Script', cursive; 
+       font-size: 42px; 
+       font-weight: bold; 
+       color: white;
+       text-shadow: 0 0 8px rgba(255,255,255,0.7), 
+                   0 0 15px rgba(255,255,255,0.4);
+       position: relative;
+       display: inline-block;
+       line-height: 1;">
+          Talkto<span style="font-family: 'Kalam', cursive; 
+                font-size: 0.7em; 
+                vertical-align: sub;
+                text-shadow: 0 0 5px rgba(255,255,255,0.7);">
+            World
+          </span>
+          <!-- 增强光效的装饰线 -->
+          <span style="position: absolute; 
+              bottom: -5px; 
+              left: 0; 
+              width: 100%; 
+              height: 1px; 
+              background: rgba(255,255,255,0.3);
+              box-shadow: 0 0 10px 2px rgba(255,255,255,0.4);">
+          </span>
+        </span>
       </div>
 
       <!-- 搜索主体区 -->
@@ -353,11 +372,11 @@ onUnmounted(() => {
               <div style="display: flex; flex-direction: column;">
                 <el-avatar :src="userinfo.avaterUrl || '@/assets/tieba.png'" class="custom-avatar"
                   style="width: 80px; height: 80px;" @click="TurnToMyinf0"></el-avatar>
-                <h4 style="font-size:14px ; color:#013a3c;margin: 5px 0 0 0;">{{ userinfo.nickname }}</h4>
+                <h4 style="font-size:16px ; color:#013a3c;margin: 5px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
 
               <!-- VIP信息区（右侧） -->
-              <div style="display: flex; flex-direction: column;margin: 0 0 0 10px;">
+              <div style="display: flex; flex-direction: column;margin: 0 0 0 0;">
                 <div style="font-size:14px ;color:#013a3c;margin-bottom: 12px;">
                   VIP：{{ userinfo.vipGrade }}
                 </div>
@@ -391,13 +410,13 @@ onUnmounted(() => {
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
                       <span
-                        style="font-size:14px;margin: 0 0 10px 0;color: #01888D; cursor: pointer; text-decoration: none;"
+                        style="font-size:16px;margin: 0 0 10px 0;color: #01888D; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_P_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                         @mouseleave="art.showUnderline_B = false"
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="font-size:14px;color: #001ea9; cursor: pointer; text-decoration: none;"
+                      <span style="font-size:16px;color: #001ea9; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_P(art)" @mouseenter="art.showUnderline = true"
                         @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
@@ -422,7 +441,7 @@ onUnmounted(() => {
           <!-- 热门话题 -->
           <div style="margin-left: 6px;">
             <h3 style="font-size:16px;margin: 0 0 5px 0; display: flex; align-items: center;">
-              <img src="@/assets/remen.png" alt="view icon" style="width: 14px; height: 14px; margin-right: 4px;">
+              <img src="@/assets/remen.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 4px;">
               热门话题
             </h3>
             <div>
@@ -434,7 +453,7 @@ onUnmounted(() => {
                     <div style="display: flex;flex-direction: column;margin: 0 0 0 5px;">
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/tieba.png" alt="view icon"
-                          style="width: 14px; height: 16px; margin-right: 4px;">
+                          style="width: 14px; height: 14px; margin-right: 4px;">
                         <span style="color:#001164; cursor: pointer; text-decoration: none;"
                           @click="handleTitleClick_RB(item.boardId)" @mouseenter="item.showUnderline = true"
                           @mouseleave="item.showUnderline = false"
@@ -456,8 +475,7 @@ onUnmounted(() => {
 
           <!-- 个性动态 -->
           <h3 style="font-size:16px;margin: 10px 0 15px 6px; display: flex; align-items: center;">
-            <img src="@/assets/dongtai.png" alt="view icon"
-              style="width: 14px; height: 14px; margin-right: 5px;">
+            <img src="@/assets/dongtai.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 5px;">
             个性动态
           </h3>
           <!-- 个性动态部分 -->
@@ -471,13 +489,13 @@ onUnmounted(() => {
                     <span style="margin: 0 0 10px 0;color: #580099; cursor: pointer; text-decoration: none;"
                       @click="handleTitleClick_H_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                       @mouseleave="art.showUnderline_B = false"
-                      :style="{ fontSize: '14px', textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
+                      :style="{ fontSize: '16px', textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                       {{ art.boardName || '匿名用户' }}
                     </span>
                     <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
                       @click="handleTitleClick_H(art)" @mouseenter="art.showUnderline = true"
                       @mouseleave="art.showUnderline = false"
-                      :style="{ fontSize: '14px', textDecoration: art.showUnderline ? 'underline' : 'none' }">
+                      :style="{ fontSize: '16px', textDecoration: art.showUnderline ? 'underline' : 'none' }">
                       {{ art.title }}
                     </span>
                     <p style="font-size:14px;">{{ art.content }}</p>

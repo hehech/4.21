@@ -1,6 +1,5 @@
 <script setup>
-import { ref } from 'vue'
-import { onMounted } from 'vue' // 必须添加这行
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router'  // 必须添加这行
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'//导入创建路由器函数
@@ -339,12 +338,36 @@ onMounted(async () => {
     } else { ElMessage.error("无boardId"); }
 })
 
+//===================================================================================
+const headerVisible = ref(false);
 
+// 滚动监听逻辑
+const handleScroll = () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    headerVisible.value = scrollTop > 210;
+};
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
-    <el-container style="height: 100vh;">
-        <el-header class="basicSS" style="display: flex; justify-content: space-between; align-items: center;">
+    <el-container class="suoyou" shallow="never" style="display: flex;flex-direction: column;">
+        <el-header class="toubu" style="display: flex; justify-content: space-between; align-items: center;" :style="{
+            position: 'fixed',
+            top: 0,
+            width: '100%',
+            zIndex: 1000,
+            transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
+            transition: 'transform 0.3s ease-in-out',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)'
+        }">
             <!-- 左侧导航内容 -->
             <div>
                 <el-breadcrumb style="font-size: 16px;">
@@ -356,60 +379,88 @@ onMounted(async () => {
             <!-- 右侧导航组件 -->
             <div>
                 <el-button-group>
-                    <el-button icon="search" @click="goBack">返回</el-button>
+                    <el-button class="anniu-wode" @click="goBack">返回</el-button>
                 </el-button-group>
             </div>
         </el-header>
 
-        <!-- 主要内容区 -->
-        <el-main style="display: flex;flex-direction: column;">
-            <!-- 搜索区 -->
-            <div class="basicSS" style="display: flex; justify-content: center; margin: 0 20px 20px 20px;">
-                <!-- 品牌标识区 -->
-                <div style="display: flex;">
-                    <span>
-                        <span style="font-size: 24px; color: #FF3B30; font-weight: bold;">科技</span>
-                        <span style="font-size: 20px; color: #1E90FF; vertical-align: sub;">贴吧</span>
-                    </span>
-                </div>
+        <!-- 搜索区 -->
+        <div
+            style="position: relative; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <!-- 视频背景 -->
+            <video autoplay muted loop playsinline
+                style="position: absolute;top: 0;left: 0;  width: 100% !important;height: 100% !important;object-fit: cover;z-index: 1;">
+                <source src="../assets/bbg1.mp4" type="video/mp4">
+            </video>
 
-                <!-- 搜索主体区-->
-                <div style="display: flex;">
-                    <el-form>
-                        <el-row :gutter="10" style="display: flex;">
-                            <!-- 搜索框列（响应式宽度） -->
-                            <el-col :xs="22" :sm="18" :md="16">
-                                <el-input placeholder="请输入关键词..." clearable style="width: 100%;" />
-                            </el-col>
 
-                            <!-- 操作按钮列（固定宽度） -->
-                            <el-col :xs="4" :sm="6" :md="8" style="display: flex; flex-direction: row;">
-                                <el-button type="primary" size-type="medium" style="width: 100%;">
-                                    进入贴吧
-                                </el-button>
-                                <el-button type="success" size-type="medium" style="width: 100%;">
-                                    全吧搜索
-                                </el-button>
-                            </el-col>
-                        </el-row>
-                    </el-form>
-                </div>
+
+            <!-- 搜索主体区 -->
+            <div style="width: 100%; max-width: 700px;padding: 10px;z-index: 1;">
+                <el-form>
+                    <el-row :span="5" style="display: flex; align-items: center;">
+                        <!-- 输入框区域 -->
+                        <!-- 内容容器 - 添加半透明背景确保文字可读性 -->
+                        <div style="padding: 20px;margin-bottom: 15px;z-index: 1;">
+                            <link
+                                href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Kalam:wght@700&display=swap"
+                                rel="stylesheet">
+
+                            <span style="font-family: 'Dancing Script', cursive; 
+       font-size: 31px; 
+       font-weight: bold; 
+       color: white;
+       text-shadow: 0 0 8px rgba(255,255,255,0.7), 
+                   0 0 15px rgba(255,255,255,0.4);
+       position: relative;
+       display: inline-block;
+       line-height: 1;">
+                                Talkto<span style="font-family: 'Kalam', cursive; 
+                font-size: 0.6em; 
+                vertical-align: sub;
+                text-shadow: 0 0 5px rgba(255,255,255,0.7);">
+                                    World
+                                </span>
+                                <!-- 增强光效的装饰线 -->
+                                <span style="position: absolute; 
+              bottom: -5px; 
+              left: 0; 
+              width: 100%; 
+              height: 1px; 
+              background: rgba(255,255,255,0.3);
+              box-shadow: 0 0 10px 2px rgba(255,255,255,0.4);">
+                                </span>
+                            </span>
+                        </div>
+                        <el-col :span="14" style="position: relative;">
+                            <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+                        </el-col>
+
+                        <!-- 搜索按钮 -->
+                        <el-col :span="4">
+                            <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+                        </el-col>
+                    </el-row>
+                </el-form>
             </div>
+        </div>
 
-            <!-- 主信息区 -->
-            <div style="margin:0 20px 0 20px;">
+        <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0">
+            <div class="kapian" style="max-width: 1100px;width: 100%;">
+                <!-- 主信息区 -->
                 <!-- 吧区 -->
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; background-color: white; border-bottom: 1px solid #e4e4e4; padding: 10px 15px;">
                     <!-- 左侧头像 -->
-                    <el-avatar class="custom-avatar" :size="80" style="flex-shrink: 0;"
+                    <el-avatar class="custom-avatar" :size="70" style="flex-shrink: 0;"
                         :src="BaInfos[0].avaterUrl || '@/assets/tieba.png'">
                     </el-avatar>
 
                     <!-- 中间标题和关注按钮 -->
                     <div style="display: flex; align-items: center; flex-grow: 1; margin-left: 15px;">
                         <h2 style="font-size: 18px; color: #333; margin: 0 12px 0 0;">{{ BaInfos[0].name }}</h2>
-                        <el-button type="danger" size="small" style="height: 24px; line-height: 24px; padding: 0 8px;">
+                        <el-button class="anniu-wode" type="danger" size="small"
+                            style="height: 24px; line-height: 24px; padding: 0 8px;">
                             +关注
                         </el-button>
                     </div>
@@ -446,7 +497,7 @@ onMounted(async () => {
                                     <span class="badge-text1">主</span>
                                     <span class="badge-text2">贴</span>
                                 </div>
-                                <div style="display: flex; justify-content: center;margin:20px 0 0 0">
+                                <div style="display: flex; justify-content: center;margin:20px 20px 0 20px">
                                     <img :src="post.UserAvater || '@/assets/tieba.png'" alt="作者头像"
                                         style="width: 90px; height: 90px;">
                                 </div>
@@ -459,7 +510,7 @@ onMounted(async () => {
                             </div>
                             <div style="flex:0.86;margin:20px 20px 20px 20px">
                                 <!-- 帖子标题 -->
-                                <div style="margin-bottom: 15px; font-size: 18px; line-height: 2;">
+                                <div style="margin-bottom: 15px; font-size: 17px; line-height: 2;">
                                     {{ post.title }}
                                 </div>
                                 <!-- 帖子正文 -->
@@ -469,7 +520,7 @@ onMounted(async () => {
                                 <!-- 帖子图片 -->
                                 <div style="margin-bottom: 15px;">
                                     <img src="@/assets/xiaoxin.jpg" alt="帖子图片"
-                                        style="width: 200px;height: 200px; border-radius: 4px;">
+                                        style="width: 180px;height: 180px; border-radius: 4px;">
                                 </div>
 
                                 <!-- 底部信息栏和互动按钮组（水平布局） -->
@@ -515,7 +566,7 @@ onMounted(async () => {
                             <!-- 帖子标题和作者信息 -->
                             <div
                                 style="flex:0.14; display: flex; flex-direction: column; align-items: center;background-color: #f5ffff;">
-                                <div style="display: flex; justify-content: center;margin:20px 0 0 0">
+                                <div style="display: flex; justify-content: center;margin:20px 20px 0 20px">
                                     <img :src="post.UserAvater || '@/assets/tieba.png'" alt="作者头像"
                                         style="width: 90px; height: 90px;">
                                 </div>
@@ -535,7 +586,7 @@ onMounted(async () => {
                                 <!-- 帖子图片 -->
                                 <div style="margin-bottom: 15px;">
                                     <img src="@/assets/xiaoxin.jpg" alt="帖子图片"
-                                        style="width: 200px;height: 200px; border-radius: 4px;">
+                                        style="width: 180px;height: 180px; border-radius: 4px;">
                                 </div>
 
                                 <!-- 底部信息栏和互动按钮组（水平布局） -->
@@ -690,14 +741,125 @@ onMounted(async () => {
                     </div>
 
                 </div>
-
             </div>
-        </el-main>
+        </div>
+
     </el-container>
 
 </template>
 
 <style scoped>
+.suoyou {
+    background-color: #eeefef;
+}
+
+.toubu {
+    background-color: #ffffff;
+}
+
+:deep(.el-breadcrumb__item) {
+    font-size: 16px;
+}
+
+:deep(.el-breadcrumb__inner) {
+    color: #2d2d2d;
+    transition: all 0.3s;
+}
+
+:deep(.el-breadcrumb__item:hover .el-breadcrumb__inner) {
+    color: #ababab;
+}
+
+.breadcrumb-item:hover {
+    text-decoration: underline;
+}
+
+.anniu-wode {
+    padding: 12px 12px !important;
+
+    background-color: #01aa8e;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.anniu-wode:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.kapian {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 3px;
+}
+
+.weibo-search-input {
+    width: 100%;
+    height: 36px;
+    padding-left: 20px;
+    /* 字体向右移动 */
+    border: none;
+    border-right: none;
+    /* 避免边框重叠 */
+    border-radius: 30px 0 0 30px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.weibo-search-input:focus {
+    box-shadow: 0 2px 8px rgba(255, 130, 0, 0.2);
+}
+
+.weibo-search-btn {
+    font-size: 18px;
+    width: 100%;
+    height: 38px;
+    border: none;
+    background: #01aa8e;
+    border-radius: 0 30px 30px 0;
+    margin-left: 0;
+}
+
+.weibo-search-btn:hover {
+    background: #02ffd5 !important;
+}
+
+/* placeholder 样式 */
+.weibo-search-input::placeholder {
+    color: #8e8e8e;
+    font-size: 16px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .basicSS {
     background: #ffffff;
 }

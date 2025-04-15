@@ -1,9 +1,6 @@
 <script setup>
-import { ref } from 'vue'
-import { onMounted } from 'vue' // 必须添加这行
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router'
-import { useRoute } from 'vue-router'  // 必须添加这行
-import { ElMessage } from 'element-plus'
 const hover = ref(false)
 const router = useRouter();
 //==================================================================================================================================================
@@ -64,26 +61,26 @@ getUserInfo();
 
 //=================================================================================================================================================
 //帖子信息展示
-import {findPersonalPost} from '@/api/post.js'
+import { findPersonalPost } from '@/api/post.js'
 const PostInfos = ref([
-    {
-        postId: 18, likeCount: 55, title: '你好', userId: 22, UserName: '和', showUnderline: false,
-        boardId: 1,viewCount:2
-    }
+  {
+    postId: 18, likeCount: 55, title: '你好', userId: 22, UserName: '和', showUnderline: false,
+    boardId: 1, viewCount: 2
+  }
 ]);
 const getPersonalPosts = async () => {
-    const rs= await findPersonalPost();
-    PostInfos.value=rs.data;
+  const rs = await findPersonalPost();
+  PostInfos.value = rs.data;
 };
 getPersonalPosts();
 const handleTitleClick = (post) => {
-    router.push({
-        path: "/post",
-        query: {
-            boardId: post.boardId,
-            postId: post.postId
-        }  // 传递贴吧名称作为查询参数
-    });
+  router.push({
+    path: "/post",
+    query: {
+      boardId: post.boardId,
+      postId: post.postId
+    }  // 传递贴吧名称作为查询参数
+  });
 }
 //==================================================================================================================================================
 //帖子信息显示
@@ -100,11 +97,36 @@ const goBack = () => {
   router.go(-1); // 返回上一页
 };
 
+//===================================================================================================================================
+const headerVisible = ref(false);
+
+// 滚动监听逻辑
+const handleScroll = () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  headerVisible.value = scrollTop > 100;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
-  <el-container style="height: 100vh;">
-    <el-header class="basicSS" style="display: flex; justify-content: space-between; align-items: center;">
+  <el-container class="suoyou" shallow="never" style="display: flex;flex-direction: column;">
+    <el-header class="toubu" style="display: flex; justify-content: space-between; align-items: center;" :style="{
+      position: 'fixed',
+      top: 0,
+      width: '100%',
+      zIndex: 1000,
+      transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
+      transition: 'transform 0.3s ease-in-out',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backdropFilter: 'blur(10px)'
+    }">
       <!-- 左侧导航内容 -->
       <div>
         <el-breadcrumb style="font-size: 16px;">
@@ -116,58 +138,89 @@ const goBack = () => {
       <!-- 右侧导航组件 -->
       <div>
         <el-button-group>
-          <el-button @click="goBack">返回</el-button>
+          <el-button class="anniu-wode" @click="goBack">返回</el-button>
         </el-button-group>
       </div>
     </el-header>
 
-    <!-- 主要内容区 -->
-    <el-main style="display: flex;flex-direction: column;">
-      <!-- 搜索区 -->
-      <div class="basicSS" style="display: flex; justify-content: center; margin: 0 20px 20px 20px;">
-        <!-- 品牌标识区 -->
-        <div style="display: flex;">
-          <span>
-            <span style="font-size: 24px; color: #FF3B30; font-weight: bold;">科技</span>
-            <span style="font-size: 20px; color: #1E90FF; vertical-align: sub;">贴吧</span>
-          </span>
-        </div>
 
-        <!-- 搜索主体区-->
-        <div style="display: flex;">
-          <el-form>
-            <el-row :gutter="10" style="display: flex;">
-              <!-- 搜索框列（响应式宽度） -->
-              <el-col :xs="22" :sm="18" :md="16">
-                <el-input placeholder="请输入关键词..." clearable style="width: 100%;" />
-              </el-col>
+    <!-- 搜索区 -->
+    <div
+      style="position: relative; height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <!-- 视频背景 -->
+      <video autoplay muted loop playsinline
+        style="position: absolute;top: 0;left: 0;  width: 100% !important;height: 100% !important;object-fit: cover;z-index: 1;">
+        <source src="../assets/bbg1.mp4" type="video/mp4">
+      </video>
 
-              <!-- 操作按钮列（固定宽度） -->
-              <el-col :xs="4" :sm="6" :md="8" style="display: flex; flex-direction: row;">
-                <el-button type="primary" size-type="medium" style="width: 100%;">
-                  进入贴吧
-                </el-button>
-                <el-button type="success" size-type="medium" style="width: 100%;">
-                  全吧搜索
-                </el-button>
-              </el-col>
-            </el-row>
-          </el-form>
-        </div>
+
+
+      <!-- 搜索主体区 -->
+      <div style="width: 100%; max-width: 700px;padding: 10px;z-index: 1;">
+        <el-form>
+          <el-row :span="5" style="display: flex; align-items: center;">
+            <!-- 输入框区域 -->
+            <!-- 内容容器 - 添加半透明背景确保文字可读性 -->
+            <div style="padding: 20px;margin-bottom: 15px;z-index: 1;">
+              <link
+                href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Kalam:wght@700&display=swap"
+                rel="stylesheet">
+
+              <span style="font-family: 'Dancing Script', cursive; 
+       font-size: 31px; 
+       font-weight: bold; 
+       color: white;
+       text-shadow: 0 0 8px rgba(255,255,255,0.7), 
+                   0 0 15px rgba(255,255,255,0.4);
+       position: relative;
+       display: inline-block;
+       line-height: 1;">
+                Talkto<span style="font-family: 'Kalam', cursive; 
+                font-size: 0.6em; 
+                vertical-align: sub;
+                text-shadow: 0 0 5px rgba(255,255,255,0.7);">
+                  World
+                </span>
+                <!-- 增强光效的装饰线 -->
+                <span style="position: absolute; 
+              bottom: -5px; 
+              left: 0; 
+              width: 100%; 
+              height: 1px; 
+              background: rgba(255,255,255,0.3);
+              box-shadow: 0 0 10px 2px rgba(255,255,255,0.4);">
+                </span>
+              </span>
+            </div>
+            <el-col :span="14" style="position: relative;">
+              <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+            </el-col>
+
+            <!-- 搜索按钮 -->
+            <el-col :span="4">
+              <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+            </el-col>
+          </el-row>
+        </el-form>
       </div>
+    </div>
 
+
+    <!-- 下侧内容区 -->
+    <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0">
       <!-- 主信息区 -->
-      <div style="margin:0 20px 0 20px">
+      <div class="kapian" style="max-width: 1200px;width: 100%;">
         <!-- 顶部背景区域 -->
-        <div style="height: 150px; background: linear-gradient(135deg, #6e8efb, #a777e3); position: relative;">
-          <el-button style="position: absolute; left: 240px; bottom: 10px;">编辑资料</el-button>
-          <el-avatar class="custom-avatar" :size="170" :src="userinfo.avaterUrl || '@/assets/tieba.png'"
-            style="position: absolute; left: 50px; bottom: -120px; border: 4px solid white; box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);"></el-avatar>
+        <div style="height: 130px;background: linear-gradient(60deg, #64b3f4 0%, #c2e59c 100%); position: relative;">
+          <el-button class="anniu-wode"
+            style="position: absolute; left: 230px; bottom: 10px;font-size: 14px;">编辑资料</el-button>
+          <el-avatar class="custom-avatar" :size="150" :src="userinfo.avaterUrl || '@/assets/tieba.png'"
+            style="position: absolute; left: 50px; bottom: -110px; border: 4px solid white;"></el-avatar>
         </div>
         <!-- 个人信息介绍区域 -->
-        <el-card style="">
-          <div style="display: flex;flex-direction: column;  margin:0 0 0 220px">
-            <h2 style="margin: 0; font-size: 24px; color: #333;font-size: 30px;">{{ userinfo.nickname }}
+        <div shallow="never" style="padding:10px">
+          <div style="display: flex;flex-direction: column;  margin:0 0 0 210px">
+            <h2 style="margin: 0; color: #333;font-size: 25px;">{{ userinfo.nickname }}
             </h2>
             <div style="margin:10px 0 0 0;">
               <el-tag type="info" size="large">用户名：{{ userinfo.nickname }}</el-tag>
@@ -176,10 +229,10 @@ const goBack = () => {
               <el-tag style="margin:0 0 0 20px;" type="info" size="large">发帖：{{ userinfo.PostCount }}</el-tag>
               <el-tag style="margin:0 0 0 20px;" type="info" size="large">地址：{{ userinfo.address }}</el-tag>
             </div>
-            <span style="margin: 10px 0 0 0;">个性签名：{{ userinfo.bio }}</span>
+            <span style="margin: 10px 0 0 0;font-size: 14px;">个性签名：{{ userinfo.bio }}</span>
           </div>
 
-        </el-card>
+        </div>
 
         <!-- 导航部件区域 -->
         <div class="nav-container">
@@ -197,7 +250,7 @@ const goBack = () => {
         <div style="display: flex;">
           <!-- 帖子列表 -->
           <div style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
-            <h3 style="margin: 15px 0 0 30px;">
+            <h3 style="margin: 15px 0 0 30px;font-size: 16px;">
               最新动态
             </h3>
             <!-- 置顶帖1 -->
@@ -283,8 +336,8 @@ const goBack = () => {
         </div>
       </div>
 
+    </div>
 
-    </el-main>
   </el-container>
 
 
@@ -293,6 +346,132 @@ const goBack = () => {
 </template>
 
 <style scoped>
+.suoyou {
+  background-color: #eeefef;
+}
+
+.toubu {
+  background-color: #ffffff;
+}
+
+:deep(.el-breadcrumb__item) {
+  font-size: 16px;
+}
+
+:deep(.el-breadcrumb__inner) {
+  color: #2d2d2d;
+  transition: all 0.3s;
+}
+
+:deep(.el-breadcrumb__item:hover .el-breadcrumb__inner) {
+  color: #ababab;
+}
+
+.breadcrumb-item:hover {
+  text-decoration: underline;
+}
+
+.anniu-wode {
+  padding: 12px 24px !important;
+
+  background-color: #01aa8e;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.anniu-wode:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.kapian {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 3px;
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
+.weibo-search-input {
+  width: 100%;
+  height: 36px;
+  padding-left: 20px;
+  /* 字体向右移动 */
+  border: none;
+  border-right: none;
+  /* 避免边框重叠 */
+  border-radius: 30px 0 0 30px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.weibo-search-input:focus {
+  box-shadow: 0 2px 8px rgba(255, 130, 0, 0.2);
+}
+
+.weibo-search-btn {
+  font-size: 18px;
+  width: 100%;
+  height: 38px;
+  border: none;
+  background: #01aa8e;
+  border-radius: 0 30px 30px 0;
+  margin-left: 0;
+}
+
+.weibo-search-btn:hover {
+  background: #02ffd5 !important;
+}
+
+/* placeholder 样式 */
+.weibo-search-input::placeholder {
+  color: #8e8e8e;
+  font-size: 16px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .basicSS {
   background: #ffffff;
 }
@@ -318,13 +497,6 @@ const goBack = () => {
   background-position: center;
 }
 
-.nav-container {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--el-border-color-light);
-}
 
 :deep(.el-tabs) {
   flex: 1;
@@ -343,9 +515,5 @@ const goBack = () => {
 .search-input {
   width: 260px;
   margin-left: 20px;
-}
-
-.breadcrumb-item:hover {
-  text-decoration: underline;
 }
 </style>
