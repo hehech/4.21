@@ -1,26 +1,15 @@
 <script setup>
 
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'//导入创建路由器函数
 const router = useRouter()
-const searchForm = ref({
-  query: ''
-});
 
 const handleInputFocus = () => {
   // 输入框聚焦时添加动画
 };
 
-const handleEnter = () => {
-  console.log('进入贴吧', searchForm.value.query);
-  // 这里可以添加路由跳转或API调用
-};
 
-const handleAllSearch = () => {
-  console.log('全吧搜索', searchForm.value.query);
-  // 这里可以添加搜索逻辑
-};
 
 //===========================================================================================
 //热门吧展示
@@ -241,20 +230,38 @@ const hotpostclick = (post) => {
     }  // 传递贴吧名称作为查询参数
   });
 }
+//=================================================================================================================================
+const headerVisible = ref(false);
 
+// 滚动监听逻辑
+const handleScroll = () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  headerVisible.value = scrollTop > 280;
+};
 
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
 
-
-
-
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 
 <template>
-  <el-container class="toubu"style="height: 100vh;">
+  <el-container class="suoyou" style="display: flex;flex-direction: column;">
     <!-- 头部区域 -->
-    <el-header
-      style="display: flex; justify-content: space-between; align-items: center;">
+    <el-header class="toubu" style="display: flex; justify-content: space-between; align-items: center;" :style="{
+      position: 'fixed',
+      top: 0,
+      width: '100%',
+      zIndex: 1000,
+      transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
+      transition: 'transform 0.3s ease-in-out',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backdropFilter: 'blur(10px)'
+    }">
       <!-- 左侧导航内容 -->
       <div>
         <el-breadcrumb style="font-size: 16px;">
@@ -294,95 +301,103 @@ const hotpostclick = (post) => {
     </el-header>
 
     <!-- 主要内容区 -->
-    <el-main 
-      style="display: flex;flex-direction: column;">
-      <!-- 搜索区 -->
-      <div class="Sousuo"
-        style="display: flex; justify-content: center; margin: 0 20px 20px 20px;">
-        <!-- 品牌标识区 -->
-        <div style="display: flex;margin-top:">
-          <span>
-            <span style="font-size: 24px; color: #ff0041; font-weight: bold;">Talkto</span>
-            <span style="font-size: 20px; color: #ffc700; vertical-align: sub;">World</span>
-          </span>
-        </div>
+    <!-- 搜索区 -->
+    <div
+      style="position: relative; height: 330px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <!-- 视频背景 -->
+      <video autoplay muted loop playsinline
+        style="position: absolute;top: 0;left: 0;  width: 100% !important;height: 100% !important;object-fit: cover;z-index: 1;">
+        <source src="../assets/weibobg1.mp4" type="video/mp4">
+      </video>
 
-        <!-- 搜索主体区-->
-        <div style="display: flex;">
-          <el-form>
-            <el-row style="display: flex;">
-              <!-- 搜索框列（响应式宽度） -->
-              <el-col :xs="20" :sm="18" :md="16">
-                <input class="shurukuang" placeholder="请输入关键词..." @focus="handleInputFocus" />
-              </el-col>
-
-              <!-- 操作按钮列（固定宽度） -->
-              <el-col :xs="4" :sm="6" :md="8" style="display: flex; flex-direction: row;margin-left: -45px;">
-                <el-button class="anniu-sousuo"size-type="medium" style="width: 100%;">
-                  进入贴吧
-                </el-button>
-                <el-button class="anniu-sousuo"size-type="medium" style="width: 100%;">
-                  全吧搜索
-                </el-button>
-              </el-col>
-            </el-row>
-          </el-form>
-        </div>
+      <!-- 内容容器 - 添加半透明背景确保文字可读性 -->
+      <div style="padding: 20px;margin-bottom: 15px;z-index: 1;">
+        <span style="font-size: 30px;font-weight: bold;background-color: #ffffff;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    color: transparent;">Talkto</span>
+        <span style="font-size: 30px;font-weight: bold;background-color: #ffffff;
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    color: transparent;vertical-align: sub;">World</span>
       </div>
 
-      <!-- 下侧区域 -->
-      <div style="display: flex;">
-        <!-- 左侧内容区 -->
-        <el-card class="gerenxinxi"style="flex: 0.21;margin: 0 20px 20px 20px;">
-          <!-- 个人信息展示区 -->
-          <el-card class="touxiang" :data="userinfo" style="display: flex; flex-direction: column;margin: 0 0 15px 0;">
+      <!-- 搜索主体区 -->
+      <div style="width: 100%; max-width: 700px;padding: 10px;z-index: 1;">
+        <el-form>
+          <el-row style="display: flex; align-items: center;">
+            <!-- 输入框区域 -->
+            <el-col :span="20" style="position: relative;">
+              <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" @focus="handleInputFocus" />
+            </el-col>
 
-            <div style="display: flex;">
-              <!-- 用户头像区（左侧） -->
+            <!-- 搜索按钮 -->
+            <el-col :span="4">
+              <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+            </el-col>
+          </el-row>
+        </el-form>
+      </div>
+    </div>
+
+    <!-- 下侧区域 -->
+    <div style="display: flex; justify-content: center; width: 100%;margin:10px 0 0 0">
+      <div style="display: flex;max-width: 1200px;">
+        <!-- 左侧内容区 -->
+        <div class="gerenxinxi" style="flex: 0.20;margin: 0 10px 10px 10px;">
+
+          <!-- 个人信息展示区 -->
+          <div class="kapian" style="display: flex;flex-direction: column;">
+            <!-- 用户头像区（左侧） -->
+            <div style="display: flex;flex-direction: row; justify-content: center;margin: 25px 0 0 0;">
               <div style="display: flex; flex-direction: column;">
                 <el-avatar :src="userinfo.avaterUrl || '@/assets/tieba.png'" class="custom-avatar"
-                  style="width: 95px; height: 95px;" @click="TurnToMyinf0"></el-avatar>
-                <h4 style="color:#013a3c;margin: 10px 0 0 0;">{{ userinfo.nickname }}</h4>
+                  style="width: 80px; height: 80px;" @click="TurnToMyinf0"></el-avatar>
+                <h4 style="font-size:14px ; color:#013a3c;margin: 5px 0 0 0;">{{ userinfo.nickname }}</h4>
               </div>
 
               <!-- VIP信息区（右侧） -->
-              <div style="display: flex; flex-direction: column;margin: 0 0 0 15px;">
-                <div style="color:#013a3c;margin-bottom: 12px;">
+              <div style="display: flex; flex-direction: column;margin: 0 0 0 10px;">
+                <div style="font-size:14px ;color:#013a3c;margin-bottom: 12px;">
                   VIP：{{ userinfo.vipGrade }}
                 </div>
-                <div style="color:#013a3c;margin-bottom: 12px;">
+                <div style="font-size:14px ;color:#013a3c;margin-bottom: 12px;">
                   帖子：{{ userinfo.PostCount }}
                 </div>
-                <div style="color:#013a3c;">
+                <div style="font-size:14px ;color:#013a3c;">
                   粉丝：567
                 </div>
               </div>
             </div>
-            <div class="jianjieziti" style="width: 100%;">
+            <div class="jianjiequ" :data="userinfo" style="margin: 0 0 10px 25px;">
               <p>{{ userinfo.bio }}
               </p>
             </div>
 
-          </el-card>
+          </div>
+
+
 
           <!-- 最新动态区 -->
-          <h3 style="margin: 0 0 15px 0;">
-            最新动态
-          </h3>
-          <div style="margin: 10px 0 0 0;overflow-y: auto;border-radius: 4px;">
+
+          <div style="margin: 10px 0 0 0;overflow-y: auto;">
+            <h3 style="font-size:16px;margin: 0 0 10px 0;">
+              最新动态
+            </h3>
             <el-scrollbar ref="scrollbar_P" style="height: 100%;">
               <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
               <div v-for="(art, index) in visibleParts" :key="index">
-                <el-card  class="zuixinka"style="margin: 0 0 15px 0;">
+                <el-card class="kapian" style="margin: 0 0 10px 0;">
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
-                      <span style="margin: 0 0 15px 0;color: #01888D; cursor: pointer; text-decoration: none;"
+                      <span
+                        style="font-size:14px;margin: 0 0 10px 0;color: #01888D; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_P_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                         @mouseleave="art.showUnderline_B = false"
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
+                      <span style="font-size:14px;color: #001ea9; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_P(art)" @mouseenter="art.showUnderline = true"
                         @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
@@ -400,36 +415,36 @@ const hotpostclick = (post) => {
             </el-scrollbar>
 
           </div>
-        </el-card>
+        </div>
 
         <!-- 中间推荐区 -->
-        <div class="zhongjiantuijian"style="flex:0.57;margin: 0 20px 20px 0;padding: 20px;">
+        <div class="kapian" style="flex:0.60;margin: 0 10px 0 0;padding: 20px;">
           <!-- 热门话题 -->
           <div style="margin-left: 6px;">
-            <h3 style="margin: 0 0 5px 0; display: flex; align-items: center;">
-              <img src="@/assets/remen.png" alt="view icon" style="width: 18px; height: 18px; margin-right: 4px;">
+            <h3 style="font-size:16px;margin: 0 0 5px 0; display: flex; align-items: center;">
+              <img src="@/assets/remen.png" alt="view icon" style="width: 14px; height: 14px; margin-right: 4px;">
               热门话题
             </h3>
             <div>
               <el-row>
                 <el-col :span="6" v-for="(item, index) in items" :key="index">
                   <div style="display: flex;flex-direction: row;margin: 15px 15px 15px 0;">
-                    <img :src="item.avaterUrl || '@/assets/tieba.png'" alt="icon" class="baIcon">
+                    <img :src="item.avaterUrl || '@/assets/tieba.png'" alt="icon" class="remenba">
 
                     <div style="display: flex;flex-direction: column;margin: 0 0 0 5px;">
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/tieba.png" alt="view icon"
-                          style="width: 16px; height: 16px; margin-right: 4px;">
+                          style="width: 14px; height: 16px; margin-right: 4px;">
                         <span style="color:#001164; cursor: pointer; text-decoration: none;"
                           @click="handleTitleClick_RB(item.boardId)" @mouseenter="item.showUnderline = true"
                           @mouseleave="item.showUnderline = false"
-                          :style="{ fontSize: '16px', textDecoration: item.showUnderline ? 'underline' : 'none' }">
+                          :style="{ fontSize: '14px', textDecoration: item.showUnderline ? 'underline' : 'none' }">
                           {{ item.name }}
                         </span>
                       </div>
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/renqi.png" alt="view icon"
-                          style="width: 16px; height: 16px; margin-right: 4px;">
+                          style="width: 14px; height: 16px; margin-right: 4px;">
                         <span style="font-size: 12px;">{{ item.viewCount }}</span>
                       </div>
                     </div>
@@ -440,8 +455,9 @@ const hotpostclick = (post) => {
           </div>
 
           <!-- 个性动态 -->
-          <h3 style="margin: 10px 0 15px 6px; display: flex; align-items: center;">
-            <img src="@/assets/dongtai.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 5px;">
+          <h3 style="font-size:16px;margin: 10px 0 15px 6px; display: flex; align-items: center;">
+            <img src="@/assets/dongtai.png" alt="view icon"
+              style="width: 14px; height: 14px; margin-right: 5px;">
             个性动态
           </h3>
           <!-- 个性动态部分 -->
@@ -449,27 +465,25 @@ const hotpostclick = (post) => {
             <!-- 使用 el-scrollbar 包裹卡片列表 -->
             <el-scrollbar ref="scrollbar_H" style="height: 100%;">
               <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
-              <div v-for="(art, index) in visibleArts" :key="index">
-                <el-card class="gexign"style="margin: 0 0 15px 0;">
-                  <el-list>
-                    <el-list-item style="display: flex; flex-direction: column;">
-                      <span style="margin: 0 0 15px 0;color: #580099; cursor: pointer; text-decoration: none;"
-                        @click="handleTitleClick_H_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
-                        @mouseleave="art.showUnderline_B = false"
-                        :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
-                        {{ art.boardName || '匿名用户' }}
-                      </span>
-                      <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
-                        @click="handleTitleClick_H(art)" @mouseenter="art.showUnderline = true"
-                        @mouseleave="art.showUnderline = false"
-                        :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
-                        {{ art.title }}
-                      </span>
-                      <p>{{ art.content }}</p>
-                    </el-list-item>
-                  </el-list>
-                </el-card>
-              </div>
+              <el-card class="kapian" style="margin: 0 0 10px 0;" v-for="(art, index) in visibleArts" :key="index">
+                <el-list>
+                  <el-list-item style="display: flex; flex-direction: column;">
+                    <span style="margin: 0 0 10px 0;color: #580099; cursor: pointer; text-decoration: none;"
+                      @click="handleTitleClick_H_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
+                      @mouseleave="art.showUnderline_B = false"
+                      :style="{ fontSize: '14px', textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
+                      {{ art.boardName || '匿名用户' }}
+                    </span>
+                    <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
+                      @click="handleTitleClick_H(art)" @mouseenter="art.showUnderline = true"
+                      @mouseleave="art.showUnderline = false"
+                      :style="{ fontSize: '14px', textDecoration: art.showUnderline ? 'underline' : 'none' }">
+                      {{ art.title }}
+                    </span>
+                    <p style="font-size:14px;">{{ art.content }}</p>
+                  </el-list-item>
+                </el-list>
+              </el-card>
               <div style="display: flex; justify-content: center; width: 100%;">
                 <el-link type="primary" @click="loadMore_P" style="font-size: 14px; cursor: pointer;">
                   更多帖子
@@ -480,19 +494,18 @@ const hotpostclick = (post) => {
         </div>
 
         <!-- 热议榜区 -->
-        <div class="reyi"style="flex:0.22;box-shadow: 0 1px 3px rgba(0,0,0,0.1);margin: 0 20px 20px 0;padding:20px">
-          <h2
-            style="font-size: 18px; color: #333; margin: 0 0 10px 0; padding-bottom: 10px;">
+        <div class="kapian" style="flex:0.20;margin: 0 10px 10px 0;padding:20px">
+          <h2 style="font-size: 16px; color: #333; margin: 0 0 5px 0;">
             热议榜</h2>
 
           <ol style="list-style: none; padding: 0; margin: 0;">
             <li
-              style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5;"
+              style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f5f5f5;"
               v-for="post in HotPostInfos" :key="post.postId">
               <div style="display: flex; align-items: center;">
                 <span
-                  style="font-size: 16px; font-weight: bold; color: #f85959; width: 20px; text-align: center; ">1</span>
-                <span style="font-size: 15px;color: #333;margin-left: 4px;cursor: pointer;text-decoration: none;
+                  style="font-size: 14px; font-weight: bold; color: #f85959; width: 20px; text-align: center; ">1</span>
+                <span style="font-size: 14px;color: #333;margin-left: 2px;cursor: pointer;text-decoration: none;
                              display: inline-block;max-width: 220px;white-space: nowrap;overflow: hidden;
                              text-overflow: ellipsis;" @mouseenter="post.showUnderline_hot = true"
                   @mouseleave="post.showUnderline_hot = false"
@@ -503,12 +516,12 @@ const hotpostclick = (post) => {
               </div>
               <span style="font-size: 13px; color: #999;">{{ post.viewCount }}</span>
             </li>
-
           </ol>
         </div>
       </div>
+    </div>
 
-    </el-main>
+
 
   </el-container>
 </template>
@@ -516,78 +529,65 @@ const hotpostclick = (post) => {
 
 
 <style scoped>
-.Sousuo {
-  padding: 10px;
-  border: 2px solid #018e93;
-  /* 绿色边框 */
-  border-radius: 12px;
-  /* 圆角 */
-  box-shadow: 0 4px 8px rgba(2, 133, 156, 0.2);
-  /* 阴影 */
-}
-
 :deep(.el-breadcrumb__item) {
   font-size: 18px;
 }
 
 :deep(.el-breadcrumb__inner) {
-  color: #0881fb;
+  color: #2d2d2d;
   transition: all 0.3s;
 }
 
 :deep(.el-breadcrumb__item:hover .el-breadcrumb__inner) {
-  color: #adfcad;
+  color: #ababab;
 }
 
 .anniu-wode {
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
   padding: 12px 24px !important;
 
-  background: linear-gradient(135deg, #84e2f5 0%, #8fd3f4 100%) !important;
+  background-color: #01aa8e;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .anniu-wode:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4) !important;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* 下拉菜单优化 */
 :deep(.el-dropdown-menu) {
-  background: #06eab8 !important;
+  background: #01aa8e !important;
   border: 1px solid #016f22;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 :deep(.el-dropdown-menu__item) {
-  color: #0080cf;
+  color: #262626;
   font-weight: 500;
 
   &:hover {
-    background: #c0fef9 !important;
+    background: #dadada !important;
   }
 }
 
 /* 搜索框优化 */
 /* 同时修改外层容器和内部输入框 */
 .shurukuang {
-  margin:0 0 0 8px;
-  background:linear-gradient(120deg, #99f5ba 0%, #9cd7f5 100%);
+  background: linear-gradient(120deg, #99f5ba 0%, #9cd7f5 100%);
   border: 1px solid #018e93;
   border-radius: 8px;
-  padding: 8px;
+  padding: 12px;
 }
 
 
 /* 搜索框右侧按钮 */
 .anniu-sousuo {
-  color: #00ae97 ;
+  color: #00ae97;
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
   padding: 12px 24px !important;
 
-  background:linear-gradient(120deg, #90edd7 0%, #a4e2e9 100%);
+  background: linear-gradient(120deg, #90edd7 0%, #a4e2e9 100%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
@@ -599,54 +599,106 @@ const hotpostclick = (post) => {
 }
 
 /* 个人信息区 */
-.gerenxinxi{
-  background-image: linear-gradient(120deg, #84fab0 0%, #76d7bc 100%);
-  border: 2px solid #018e93;
-  border-radius: 8px;
+.gerenxinxi {
+  background-color: #eeefef;
+  border: none;
+  border-radius: 3px;
 }
 
-/* 头像区*/
-.touxiang{
-  background-image: linear-gradient(120deg, #b6ffd1 0%, #7ae1a7 100%);
-  border: 1px solid #018e93;
-  border-radius: 8px;
+.kapian {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 3px;
 }
 
-
-.jianjieziti{
+.jianjiequ {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 3px;
   font-size: 13px;
   /* 调整字体大小 */
-  color: #013e39;
+  color: #000000;
 }
 
-.zuixinka{
-  background-image: linear-gradient(120deg, #b6ffd1 0%, #7ae1a7 100%);
-  border: 1px solid #018e93;
+.zuixinka {
+  background-color: #f5f5f5;
+  border: none;
   border-radius: 8px;
 }
 
-.zhongjiantuijian{
-  /* background-image: linear-gradient(120deg, #8bebc3 0%, #6fd6ed 100%); */
-  border: 1px solid #018e93;
-  border-radius: 8px;
+
+.suoyou {
+  background-color: #eeefef;
 }
 
-.toubu{
-  background-image: linear-gradient(120deg, #83f9ae 0%, #6fc3ed 100%);
-    /* 自定义滚动条样式 */
-  scrollbar-width: thin;
-  scrollbar-color: #6fd6ed #6fd6ed;
+.toubu {
+  background-color: #eeefef;
 }
 
-.gexign{
+.gexign {
   background-image: linear-gradient(120deg, #8bebc3 0%, #6fd6ed 100%);
   border: 1px solid #018e93;
   border-radius: 8px;
 }
-.reyi{
+
+.reyi {
   border: 1px solid #018e93;
   border-radius: 8px;
 }
+
+/* 在 style 部分添加 */
+.el-header {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  will-change: transform;
+}
+
+.weibo-search-input {
+  width: 100%;
+  height: 46px;
+  padding-left: 20px;
+  /* 字体向右移动 */
+  border: none;
+  border-right: none;
+  /* 避免边框重叠 */
+  border-radius: 30px 0 0 30px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.weibo-search-input:focus {
+  box-shadow: 0 2px 8px rgba(255, 130, 0, 0.2);
+}
+
+.weibo-search-btn {
+  font-size: 18px;
+  width: 100%;
+  height: 48px;
+  border: none;
+  background: #01aa8e;
+  border-radius: 0 30px 30px 0;
+  margin-left: 0;
+}
+
+.weibo-search-btn:hover {
+  background: #02ffd5 !important;
+}
+
+/* placeholder 样式 */
+.weibo-search-input::placeholder {
+  color: #8e8e8e;
+  font-size: 16px;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -683,12 +735,12 @@ const hotpostclick = (post) => {
   margin-bottom: 15px;
 }
 
-.baIcon {
+.remenba {
   /* 1. 禁用默认圆形裁剪 */
   border-radius: 5px;
   overflow: hidden;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   /* 防止图片超出容器 */
 }
 
