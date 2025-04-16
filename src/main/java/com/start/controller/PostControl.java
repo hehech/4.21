@@ -45,5 +45,9 @@ public class PostControl {
         List<Post> cs= postService.getbapost(id);
         return Result.success(cs);
     }
-
+    @GetMapping("/percollect")
+    public Result<List<Post>> findPersonalCollectPost(){
+        List<Post> cs= postService.findPersonalCollectPost();
+        return Result.success(cs);
+    }
 }

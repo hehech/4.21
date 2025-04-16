@@ -9,3 +9,7 @@ export const getAllBoard = () => {
 export const getBoardInfoById= (id) =>{
     return request.get('/sb/board/boardinfo?id='+id);
 }
+
+export const findinterBoards=()=>{
+    return request.get('sb/board/mytopic');
+}

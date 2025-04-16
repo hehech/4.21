@@ -1,8 +1,13 @@
 <script setup>
 
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { ArrowDown } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'//导入创建路由器函数
+import { getAllBoard } from '@/api/board';
+import { findBoardNameById, findPersonalPost, findPost } from '@/api/post';
+import { findPerPost, findUser } from '@/api/user.js';
+import { ArrowDown } from '@element-plus/icons-vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router'; //导入创建路由器函数
+import { useTokenStore } from '@/stores/token.js'
+const tokenStore = useTokenStore()
 const router = useRouter()
 
 const handleInputFocus = () => {
@@ -19,11 +24,38 @@ const items = ref([
     showUnderline: false
   }
 ]);
-import { getAllBoard } from '@/api/board';
+// 热门话题分页控制
+const currentPage_R = ref(1) // 当前页码
+const pageSize_R = 8 // 每页显示数量
+
+// 计算可见的热门话题
+const visibleItems = computed(() => {
+  // 修改为：
+  const start = (currentPage_R.value - 1) * pageSize_R
+  const end = currentPage_R.value * pageSize_R
+  return items.value.slice(start, end)
+})
+
+// 加载更多方法
+const R_xiayi = () => {
+  if (currentPage_R.value < items.value.length) currentPage_R.value += 1;
+}
+const R_shangyi = () => {
+  if (currentPage_R.value > 1) currentPage_R.value -= 1;
+}
 const getAllBoards = async () => {
-  const result = await getAllBoard();
-  console.log("查询的 result:", result.data);
-  items.value = result.data;
+  try {
+    const result = await getAllBoard();
+    console.log("查询的 result:", result.data);
+
+    // 按viewCount降序排序
+    items.value = result.data.sort((a, b) => {
+      return b.viewCount - a.viewCount; // 降序排列
+    });
+  } catch (error) {
+    console.error("获取贴吧列表失败:", error);
+    items.value = []; // 失败时清空数据
+  }
 };
 getAllBoards();
 //点击事件
@@ -44,7 +76,6 @@ const userinfo = ref({
   vipGrade: '',
   PostCount: 1
 })
-import { findUser, findPerPost } from '@/api/user.js';
 const getUserInfo = async () => {
   try {
     // 1. 获取用户基本信息
@@ -79,7 +110,15 @@ const arts = ref([
     showUnderline_B: false
   }
 ]);
-import { findPost, findBoardNameById } from '@/api/post';
+const currentPage_H = ref(1); // 当前页码
+const pageSize_H = 5; // 每页显示数量
+const visibleArts = computed(() => {
+  return arts.value.slice(0, currentPage_H.value * pageSize_H);
+});
+const loadMore_H = () => {
+  currentPage_H.value += 1;
+  console.log('加载更多帖子，当前页:', currentPage_H.value);
+};
 const getAllPost = async () => {
   try {
     // 1. 获取帖子列表
@@ -106,14 +145,6 @@ const getAllPost = async () => {
 getAllPost();
 const scrollbar_H = ref(null);
 // 计算属性：只显示前 2 个卡片
-const visibleArts = computed(() => {
-  return arts.value.slice(0, 3);
-});
-// 加载更多帖子
-const loadMore_H = () => {
-  // 这里可以加载更多数据或展开所有卡片
-  console.log('加载更多帖子');
-};
 //title点击处理
 const handleTitleClick_H = (post) => {
   router.push({
@@ -139,43 +170,65 @@ const parts = ref([
   {
     boardId: 1, title: '吉大常高鸣', content: '荣获年度TOP1', showUnderline: false,
     boardName: '',
-    showUnderline_B: false
+    showUnderline_B: false,
+    lastUpdateTime: ''
   }
 ]);
-import { findPersonalPost } from '@/api/post';
+const currentPage_P = ref(1); // 当前页码
+const pageSize_P = 5; // 每页显示数量
+const visibleParts = computed(() => {
+  return parts.value.slice(0, currentPage_P.value * pageSize_P);
+});
+
+const loadMore_P = () => {
+  currentPage_P.value += 1;
+  console.log('加载更多帖子，当前页:', currentPage_P.value);
+};
 const getMyPosts = async () => {
   try {
-    // 1. 获取帖子列表
     const result = await findPersonalPost();
 
-    // 2. 并行获取每个帖子的boardName
     const updatedArts = await Promise.all(
       result.data.map(async post => {
-        const boardInfo = await findBoardNameById(post.boardId);
-        return {
-          ...post,
-          boardName: boardInfo.data || '未知板块'
-        };
+        try {
+          const boardInfo = await findBoardNameById(post.boardId);
+          return {
+            ...post,
+            boardName: boardInfo.data || '未知板块',
+            // 确保时间字段存在
+            lastUpdateTime: post.lastUpdateTime || new Date(0).toISOString()
+          };
+        } catch (e) {
+          console.error(`获取板块${post.boardId}名称失败:`, e);
+          return {
+            ...post,
+            boardName: '未知板块'
+          };
+        }
       })
     );
 
-    // 3. 更新响应式数据
+    // 安全排序
+    updatedArts.sort((a, b) => {
+      try {
+        return new Date(b.lastUpdateTime) - new Date(a.lastUpdateTime);
+      } catch (e) {
+        console.error('日期解析错误:', e);
+        return 0;
+      }
+    });
+
     parts.value = updatedArts;
   } catch (error) {
     console.error('数据加载失败:', error);
-    parts.value = []; // 失败时清空数据
+    parts.value = [];
   }
 }
 getMyPosts();
 
 const scrollbar_P = ref(null);
-const visibleParts = computed(() => {
-  return parts.value.slice(0, 3);
-});
-const loadMore_P = () => {
-  // 这里可以加载更多数据或展开所有卡片
-  console.log('加载更多帖子');
-};
+
+
 //title点击处理
 const handleTitleClick_P = (post) => {
   router.push({
@@ -210,9 +263,10 @@ const getHotPosts = async () => {
   try {
     const result = await findPost();
     if (result.data) {
-      console.log("API返回数据:", result.data); // 调试输出数据结构
-      HotPostInfos.value = result.data;
-      console.log("改变后返回数据:", HotPostInfos.value); // 调试输出数据结构
+      // 添加排序逻辑
+      HotPostInfos.value = result.data
+        .sort((a, b) => b.viewCount - a.viewCount)
+        .slice(0, 15);
     } else {
       ElMessage.error("数据加载失败");
     }
@@ -246,6 +300,34 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
+//==================================================================================================================================
+import { ElMessage, ElMessageBox } from 'element-plus';
+
+const handleLogout = async () => {
+  try {
+    // 添加确认对话框
+    await ElMessageBox.confirm('确定要退出登录吗?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+
+    // 清除用户状态
+    tokenStore.removeToken()
+
+    // 跳转到登录页
+    router.push('/login')
+
+    // 提示退出成功
+    ElMessage.success('退出登录成功')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('退出登录失败')
+      console.error('退出登录错误:', error)
+    }
+  }
+}
 </script>
 
 
@@ -271,20 +353,6 @@ onUnmounted(() => {
 
       <!-- 右侧导航组件 -->
       <div>
-        <el-button-group>
-
-          <el-dropdown>
-            <el-button class="anniu-wode" type="primary">我的<el-icon><arrow-down /></el-icon></el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>我的关注</el-dropdown-item>
-                <el-dropdown-item divided>我的贴吧</el-dropdown-item>
-                <el-dropdown-item divided @click="goToMyInfo">我的主页</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-
-
           <el-dropdown>
             <el-button class="anniu-wode" type="primary">更多<el-icon><arrow-down /></el-icon></el-button>
             <template #dropdown>
@@ -292,11 +360,10 @@ onUnmounted(() => {
                 <el-dropdown-item>账号设置</el-dropdown-item>
                 <el-dropdown-item divided>问题反馈</el-dropdown-item>
                 <el-dropdown-item divided>切换账号</el-dropdown-item>
-                <el-dropdown-item divided>退出登录</el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-        </el-button-group>
       </div>
     </el-header>
 
@@ -376,7 +443,7 @@ onUnmounted(() => {
               </div>
 
               <!-- VIP信息区（右侧） -->
-              <div style="display: flex; flex-direction: column;margin: 0 0 0 0;">
+              <div style="display: flex; flex-direction: column;margin: 0 0 0 8px;">
                 <div style="font-size:14px ;color:#013a3c;margin-bottom: 12px;">
                   VIP：{{ userinfo.vipGrade }}
                 </div>
@@ -404,19 +471,19 @@ onUnmounted(() => {
               最新动态
             </h3>
             <el-scrollbar ref="scrollbar_P" style="height: 100%;">
-              <!-- 遍历 arts 数组，最多显示 2 个卡片 -->
+              <!-- 遍历 arts 数组，最多显示 10 个卡片 -->
               <div v-for="(art, index) in visibleParts" :key="index">
                 <el-card class="kapian" style="margin: 0 0 10px 0;">
                   <el-list>
                     <el-list-item style="display: flex; flex-direction: column;">
                       <span
-                        style="font-size:16px;margin: 0 0 10px 0;color: #01888D; cursor: pointer; text-decoration: none;"
+                        style="font-size:14px;margin: 0 0 10px 0;color: #01888D; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_P_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                         @mouseleave="art.showUnderline_B = false"
                         :style="{ textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                         {{ art.boardName || '匿名用户' }}
                       </span>
-                      <span style="font-size:16px;color: #001ea9; cursor: pointer; text-decoration: none;"
+                      <span style="font-size:14px;color: #001ea9; cursor: pointer; text-decoration: none;"
                         @click="handleTitleClick_P(art)" @mouseenter="art.showUnderline = true"
                         @mouseleave="art.showUnderline = false"
                         :style="{ textDecoration: art.showUnderline ? 'underline' : 'none' }">
@@ -427,9 +494,13 @@ onUnmounted(() => {
                 </el-card>
               </div>
               <div style="display: flex; justify-content: center; width: 100%;">
-                <el-link type="primary" @click="loadMore_H" style="font-size: 14px; cursor: pointer;">
+                <el-link v-if="currentPage_P * pageSize_P < parts.length" type="primary" @click="loadMore_P"
+                  style="font-size: 14px; cursor: pointer;">
                   更多帖子
                 </el-link>
+                <span v-else style="font-size: 14px; color: #999;">
+                  没有更多了
+                </span>
               </div>
             </el-scrollbar>
 
@@ -437,16 +508,24 @@ onUnmounted(() => {
         </div>
 
         <!-- 中间推荐区 -->
-        <div class="kapian" style="flex:0.60;margin: 0 10px 0 0;padding: 20px;">
+        <div class="kapian" style="flex:0.59;margin: 0 10px 0 0;padding: 20px;">
           <!-- 热门话题 -->
           <div style="margin-left: 6px;">
-            <h3 style="font-size:16px;margin: 0 0 5px 0; display: flex; align-items: center;">
-              <img src="@/assets/remen.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 4px;">
-              热门话题
-            </h3>
+            <div style="display: flex;justify-content: space-between; width: 100%;">
+              <h3 style="font-size:16px;margin: 0 0 5px 0; display: flex; align-items: center;">
+                <img src="@/assets/remen.png" alt="view icon" style="width: 16px; height: 16px; margin-right: 4px;">
+                热门话题
+              </h3>
+              <div>
+                <img @click="R_shangyi" src="@/assets/shangyi.png" alt="view icon"
+                  style="width: 18px; height: 18px; margin-right:12px;">
+                <img @click="R_xiayi" src="@/assets/xiayi.png" alt="view icon" style="width: 18px; height: 18px;">
+              </div>
+            </div>
+
             <div>
               <el-row>
-                <el-col :span="6" v-for="(item, index) in items" :key="index">
+                <el-col :span="6" v-for="(item, index) in visibleItems" :key="index">
                   <div style="display: flex;flex-direction: row;margin: 15px 15px 15px 0;">
                     <img :src="item.avaterUrl || '@/assets/tieba.png'" alt="icon" class="remenba">
 
@@ -454,7 +533,9 @@ onUnmounted(() => {
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/tieba.png" alt="view icon"
                           style="width: 14px; height: 14px; margin-right: 4px;">
-                        <span style="color:#001164; cursor: pointer; text-decoration: none;"
+                        <span
+                          style="color:#001164; cursor: pointer; text-decoration: none;
+                          max-width:60px; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
                           @click="handleTitleClick_RB(item.boardId)" @mouseenter="item.showUnderline = true"
                           @mouseleave="item.showUnderline = false"
                           :style="{ fontSize: '14px', textDecoration: item.showUnderline ? 'underline' : 'none' }">
@@ -463,7 +544,7 @@ onUnmounted(() => {
                       </div>
                       <div style="display: flex; align-items: center;">
                         <img src="@/assets/renqi.png" alt="view icon"
-                          style="width: 14px; height: 16px; margin-right: 4px;">
+                          style="width: 16px; height: 16px; margin-right: 4px;">
                         <span style="font-size: 12px;">{{ item.viewCount }}</span>
                       </div>
                     </div>
@@ -489,13 +570,13 @@ onUnmounted(() => {
                     <span style="margin: 0 0 10px 0;color: #580099; cursor: pointer; text-decoration: none;"
                       @click="handleTitleClick_H_B(art.boardId)" @mouseenter="art.showUnderline_B = true"
                       @mouseleave="art.showUnderline_B = false"
-                      :style="{ fontSize: '16px', textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
+                      :style="{ fontSize: '14px', textDecoration: art.showUnderline_B ? 'underline' : 'none' }">
                       {{ art.boardName || '匿名用户' }}
                     </span>
                     <span style="color: #001ea9; cursor: pointer; text-decoration: none;"
                       @click="handleTitleClick_H(art)" @mouseenter="art.showUnderline = true"
                       @mouseleave="art.showUnderline = false"
-                      :style="{ fontSize: '16px', textDecoration: art.showUnderline ? 'underline' : 'none' }">
+                      :style="{ fontSize: '14px', textDecoration: art.showUnderline ? 'underline' : 'none' }">
                       {{ art.title }}
                     </span>
                     <p style="font-size:14px;">{{ art.content }}</p>
@@ -503,28 +584,33 @@ onUnmounted(() => {
                 </el-list>
               </el-card>
               <div style="display: flex; justify-content: center; width: 100%;">
-                <el-link type="primary" @click="loadMore_P" style="font-size: 14px; cursor: pointer;">
+                <el-link v-if="currentPage_H * pageSize_H < arts.length" type="primary" @click="loadMore_H"
+                  style="font-size: 14px; cursor: pointer;">
                   更多帖子
                 </el-link>
+                <span v-else style="font-size: 14px; color: #999;">
+                  没有更多了
+                </span>
               </div>
             </el-scrollbar>
           </div>
         </div>
 
         <!-- 热议榜区 -->
-        <div class="kapian" style="flex:0.20;margin: 0 10px 10px 0;padding:20px">
-          <h2 style="font-size: 16px; color: #333; margin: 0 0 5px 0;">
+        <div class="kapian" style="flex:0.21;margin: 0 10px 10px 0;max-width: 240px;">
+          <h2 style="font-size: 16px; color: #333; margin: 20px 0 5px 15px;">
             热议榜</h2>
 
-          <ol style="list-style: none; padding: 0; margin: 0;">
+          <ol style="list-style: none; padding: 0; margin: 0 0 0 5px;">
             <li
-              style="display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f5f5f5;"
-              v-for="post in HotPostInfos" :key="post.postId">
+              style="display: flex; align-items: center; justify-content: space-between; padding: 7px 9px 0 0; border-bottom: 1px solid #f5f5f5;"
+              v-for="(post, index) in HotPostInfos" :key="post.postId">
               <div style="display: flex; align-items: center;">
-                <span
-                  style="font-size: 14px; font-weight: bold; color: #f85959; width: 20px; text-align: center; ">1</span>
-                <span style="font-size: 14px;color: #333;margin-left: 2px;cursor: pointer;text-decoration: none;
-                             display: inline-block;max-width: 220px;white-space: nowrap;overflow: hidden;
+                <span style="font-size: 14px; font-weight: bold; color: #f85959; width: 15px; text-align: center; ">{{
+                  index
+                  + 1 }} </span>
+                <span style="font-size: 13px;color: #333;margin-left: 1px;cursor: pointer;text-decoration: none;
+                             display: inline-block;max-width: 190px;white-space: nowrap;overflow: hidden;
                              text-overflow: ellipsis;" @mouseenter="post.showUnderline_hot = true"
                   @mouseleave="post.showUnderline_hot = false"
                   :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"
@@ -532,7 +618,7 @@ onUnmounted(() => {
                   {{ post.title }}
                 </span>
               </div>
-              <span style="font-size: 13px; color: #999;">{{ post.viewCount }}</span>
+              <span style="font-size: 12px; color: #999;">{{ post.viewCount }}</span>
             </li>
           </ol>
         </div>

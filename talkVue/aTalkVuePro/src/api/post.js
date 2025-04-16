@@ -25,3 +25,6 @@ export const findBaHotPosts= (id) =>{
     return request.get('/sb/post/hotpost?id='+id);
 }
 
+export const findPersonalCollectPost = () =>{
+    return request.get('/sb/post/percollect');
+}

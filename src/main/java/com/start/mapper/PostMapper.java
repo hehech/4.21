@@ -30,4 +30,9 @@ public interface PostMapper {
     List<Post> gethotbapost(Integer id);
     @Select("select * from \"post\" where \"board_id\"=#{id}")
     List<Post> getbapost(Integer id);
+
+    @Select("SELECT p.* FROM \"post\" p " +
+            "INNER JOIN \"collection\" c ON p.\"post_id\" = c.\"post_id\" " +
+            "WHERE c.\"user_id\" = #{userId}")
+    List<Post> findPersonalCollectPost(Integer userId);
 }

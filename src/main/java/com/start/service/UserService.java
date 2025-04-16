@@ -3,6 +3,8 @@ package com.start.service;
 import com.start.entitle.User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 public interface UserService {
 
@@ -16,4 +18,8 @@ public interface UserService {
     User getuserinfobyid(Integer id);
 
     Integer findPerPost();
+
+    List<User> findinterusers();
+
+    List<User> findfans();
 }

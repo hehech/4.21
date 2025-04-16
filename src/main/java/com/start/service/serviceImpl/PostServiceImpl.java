@@ -44,4 +44,11 @@ public class PostServiceImpl implements PostService {
     public List<Post> getbapost(Integer id) {
         return postMapper.getbapost(id);
     }
+
+    @Override
+    public List<Post> findPersonalCollectPost() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer id = (Integer) map.get("id");
+        return postMapper.findPersonalCollectPost(id);
+    }
 }

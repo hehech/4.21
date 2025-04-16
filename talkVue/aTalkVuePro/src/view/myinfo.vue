@@ -1,15 +1,13 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router'
-const hover = ref(false)
+import { onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 const router = useRouter();
 //==================================================================================================================================================
 //搜索框变量
-const activeTab = ref('posts')
-const searchText = ref('')
+const activeTab = ref('mypost')
 //=================================================================================================================================================
 //显示个人信息
-import { findUser, findPerPost } from '@/api/user.js';
+import { findPerPost, findUser } from '@/api/user.js';
 const userinfo = ref({
   userId: 11,
   avaterUrl: '',
@@ -61,7 +59,7 @@ getUserInfo();
 
 //=================================================================================================================================================
 //帖子信息展示
-import { findPersonalPost } from '@/api/post.js'
+import { findPersonalPost } from '@/api/post.js';
 const PostInfos = ref([
   {
     postId: 18, likeCount: 55, title: '你好', userId: 22, UserName: '和', showUnderline: false,
@@ -85,10 +83,6 @@ const handleTitleClick = (post) => {
 //==================================================================================================================================================
 //帖子信息显示
 
-onMounted(async () => {
-
-})
-
 //================================================================================================================================================
 
 //================================================================================================================================================
@@ -99,7 +93,6 @@ const goBack = () => {
 
 //===================================================================================================================================
 const headerVisible = ref(false);
-
 // 滚动监听逻辑
 const handleScroll = () => {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -113,6 +106,104 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
+//====================================================================================================================================
+//收藏文章展示
+import { findPersonalCollectPost } from '@/api/post.js'
+const collectarts = ref([
+  {
+    postId: 18, likeCount: 55, title: '你好', userId: 22, showUnderline: false,
+    boardId: 1, viewCount: 2
+  }
+]);
+const getPersonalcoarts = async () => {
+  const rs = await findPersonalCollectPost();
+  collectarts.value = rs.data;
+};
+getPersonalcoarts();
+const handleCollectTitleClick = (post) => {
+  router.push({
+    path: "/post",
+    query: {
+      boardId: post.boardId,
+      postId: post.postId
+    }  // 传递贴吧名称作为查询参数
+  });
+}
+//====================================================================================================================================
+import { findinterBoards } from '@/api/board.js'
+const mytopics = ref([
+  {
+    boardId: 1, avaterUrl: 'avatar1', name: '抗压背锅', viewCount: 575, postCount: 111,
+    showUnderline: false, description: ''
+  }
+]);
+const getinterBoards = async () => {
+  try {
+    const result = await findinterBoards();
+
+    // 按viewCount降序排序
+    mytopics.value = result.data.sort((a, b) => {
+      return b.viewCount - a.viewCount; // 降序排列
+    });
+  } catch (error) {
+    console.error("获取贴吧列表失败:", error);
+    mytopics.value = []; // 失败时清空数据
+  }
+};
+getinterBoards();
+const handlemytopicClick = (id) => {
+  router.push({
+    path: "/board",
+    query: {
+      boardId: id
+    }
+  });
+}
+//=====================================================================================================================================
+//关注的人
+import {findinterusers} from '@/api/user.js'
+const interUser = ref([
+  {
+    userId: 1,
+    avaterUrl: '',
+    nickname: '',
+    showUnderline: false
+  }
+])
+const getinterusers = async () => {
+  try {
+    // 1. 获取用户基本信息
+    const rs = await findinterusers();
+    // 更新用户信息
+    interUser.value = rs.data;
+    console.log(interUser.value);
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+  }
+};
+getinterusers();
+//================================================================================================================================
+import {findfans} from '@/api/user.js'
+const fans = ref([
+  {
+    userId: 1,
+    avaterUrl: '',
+    nickname: '',
+    showUnderline: false
+  }
+])
+const getfans = async () => {
+  try {
+    // 1. 获取用户基本信息
+    const rs = await findfans();
+    // 更新用户信息
+    fans.value = rs.data;
+    console.log(fans.value);
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+  }
+};
+getfans();
 </script>
 
 <template>
@@ -209,7 +300,7 @@ onUnmounted(() => {
     <!-- 下侧内容区 -->
     <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0">
       <!-- 主信息区 -->
-      <div class="kapian" style="max-width: 1200px;width: 100%;">
+      <div class="kapian" style="max-width: 1150px;width: 100%;">
         <!-- 顶部背景区域 -->
         <div style="height: 130px;background: linear-gradient(60deg, #64b3f4 0%, #c2e59c 100%); position: relative;">
           <el-button class="anniu-wode"
@@ -237,19 +328,20 @@ onUnmounted(() => {
         <!-- 导航部件区域 -->
         <div class="nav-container">
           <el-tabs v-model="activeTab" stretch>
-            <el-tab-pane label="我的主页" name="posts"></el-tab-pane>
-            <el-tab-pane label="我的收藏" name="images"></el-tab-pane>
-            <el-tab-pane label="关注的吧" name="recommend"></el-tab-pane>
-            <!-- <el-tab-pane label="我的粉丝" name="games"></el-tab-pane> -->
+            <el-tab-pane label="我的主页" name="mypost"></el-tab-pane>
+            <el-tab-pane label="收藏文章" name="mycollection"></el-tab-pane>
+            <el-tab-pane label="关注话题" name="mytopic"></el-tab-pane>
           </el-tabs>
 
-          <el-input v-model="searchText" placeholder="用户搜索" clearable class="search-input" />
+          <el-input placeholder="用户搜索" clearable class="search-input" />
         </div>
 
         <!-- 主内容区 -->
+        <!-- 我的主页 -->
         <div style="display: flex;">
-          <!-- 帖子列表 -->
-          <div style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
+          <!-- 我的主页-->
+          <div v-if="activeTab === 'mypost'"
+            style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
             <h3 style="margin: 15px 0 0 30px;font-size: 16px;">
               最新动态
             </h3>
@@ -280,60 +372,119 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
+          <!-- 收藏文章 -->
+          <div v-if="activeTab === 'mycollection'"
+            style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
+            <h3 style="margin: 15px 0 0 30px;font-size: 16px;">
+              我的收藏
+            </h3>
+            <!-- 置顶帖1 -->
+            <div style="display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;"
+              v-for="post in collectarts" :key="post.postId">
+              <!-- 回复数 -->
+              <div style="width: 50px; text-align: center; color: #999; font-size: 14px; align-self: center;">
+                {{ post.viewCount }}
+              </div>
 
-          <!-- 右侧功能区 -->
-          <div style="display: flex;flex-direction: column;margin-top: 1px;">
-            <div style="width: 280px;margin-bottom: 3px;">
-              <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
-                关注的人</div>
-              <div
-                style="background-color: white; border-radius: 4px; padding: 15px;display:flex; flex-direction: row;">
-                <div style="display: flex; flex-direction: column;">
-                  <el-avatar class="custom-avatar" style="width: 110px; height: 110px;">
-                  </el-avatar>
-                </div>
-
-                <!-- VIP信息区（右侧） -->
-                <div style="display: flex; flex-direction: column;margin: 0 0 0 15px;">
-                  <div style="margin-bottom: 12px;">
-                    用户名
-                  </div>
-                  <div style="margin-bottom: 12px;">
-                    帖子：1234
-                  </div>
+              <div style="flex: 1;">
+                <div
+                  style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
                   <div>
-                    粉丝：567
+                    <span style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;"
+                      @click="handleCollectTitleClick(post)" @mouseenter="post.showUnderline = true"
+                      @mouseleave="post.showUnderline = false"
+                      :style="{ textDecoration: post.showUnderline ? 'underline' : 'none' }">{{
+                        post.title }}</span>
                   </div>
+                  <span style="font-size: 12px; color: #d82100; position: relative; margin-right: 30px;">
+                    <img src="@/assets/zuozhe.png" alt="view icon"
+                      style="width: 16px; height: 16px; position: absolute; left: -20px; top: 0;">
+                    {{ post.likeCount }}
+                  </span>
                 </div>
               </div>
             </div>
-            <div style="width: 280px;">
-              <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">我的粉丝
-              </div>
-              <div
-                style="background-color: white; border-radius: 4px; padding: 15px;display:flex; flex-direction: column;">
-                <div style="display: flex; flex-direction: column;">
-                  <el-avatar class="custom-avatar" style="width: 110px; height: 110px;">
-                  </el-avatar>
-                  <div style="margin: 10px 0 10px 15px;">
-                    吧主：
-                  </div>
-                </div>
+          </div>
+          <!-- 关注话题 -->
+          <div v-if="activeTab === 'mytopic'"
+            style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
+            <h3 style="margin: 15px 0 0 30px;font-size: 16px;">
+              关注话题
+            </h3>
+            <!-- 置顶帖1 -->
+            <div style="display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;"
+              v-for="bd in mytopics" :key="bd.boardId">
+              <img :src="bd.avaterUrl || '../assets/tieba.png'" alt="icon" class="remenba">
 
-                <!-- VIP信息区（右侧） -->
-                <div style="display: flex; flex-direction: column;">
-                  <div style="margin-bottom: 10px;">
-                    帖子：22
+              <div style="flex: 1;">
+                <div
+                  style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center;">
+                    <span
+                      style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;margin-left: 10px;"
+                      @click="handlemytopicClick(bd.boardId)" @mouseenter="bd.showUnderline = true"
+                      @mouseleave="bd.showUnderline = false"
+                      :style="{ textDecoration: bd.showUnderline ? 'underline' : 'none' }">{{
+                        bd.name }}</span>
+                    <!-- 回复数 -->
+                    <div style="display: flex;align-items: center;margin: 0 0 0 5px;">
+                      <img src="@/assets/yan.png" style="width:16px; height:16px; margin-right:-6px;">
+                      <!-- 负边距拉近距离 -->
+                      <div style="color:#999; font-size:14px; margin-left:4px; padding:0 5px;">
+                        {{ bd.viewCount }}
+                      </div>
+                    </div>
+                    <p style="font-size:14px;color: #999;margin-left: 20px;">{{ bd.description }}</p>
                   </div>
-                  <div>
-                    粉丝：567
-                  </div>
+
+                  <span style="font-size: 12px; color: #d82100; position: relative; margin-right: 30px;">
+                    <img src="@/assets/wenzhangshu.png" alt="view icon"
+                      style="width: 16px; height: 16px; position: absolute; left: -20px; top: 0;">
+                    {{ bd.postCount }}
+                  </span>
                 </div>
+              </div>
+            </div>
+          </div>
+          <!-- 右侧功能区 -->
+          <div style="display: flex;flex-direction: column;margin-top: 1px;">
+            <!-- 关注的人 -->
+            <div style="width: 280px;margin-bottom: 3px;">
+              <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
+                关注的人
+              </div>
+              <div v-for="u in interUser" :key="u.userId"
+                style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
+                <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
+                  style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
+                <span style="font-size: 14px; font-weight: 500; cursor: pointer;"
+                  @mouseenter="u.showUnderline = true" @mouseleave="u.showUnderline = false"
+                  :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
+                  {{ u.nickname || '匿名用户' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- 我的粉丝 -->
+            <div style="width: 280px;">
+              <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
+                我的粉丝
+              </div>
+              <div v-for="u in fans" :key="u.userId"
+                style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
+                <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
+                  style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
+                <span style="font-size: 14px; font-weight: 500; cursor: pointer;"
+                  @mouseenter="u.showUnderline = true" @mouseleave="u.showUnderline = false"
+                  :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
+                  {{ u.nickname || '匿名用户' }}
+                </span>
               </div>
             </div>
           </div>
 
         </div>
+
       </div>
 
     </div>
@@ -429,6 +580,26 @@ onUnmounted(() => {
 .weibo-search-btn:hover {
   background: #02ffd5 !important;
 }
+
+.remenba {
+  /* 1. 禁用默认圆形裁剪 */
+  margin: 0 0 0 15px;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 60px;
+  height: 60px;
+  /* 防止图片超出容器 */
+}
+
+.remenba1 {
+  /* 1. 禁用默认圆形裁剪 */
+  border-radius: 5px;
+  overflow: hidden;
+  /* 防止图片超出容器 */
+}
+
+
+
 
 /* placeholder 样式 */
 .weibo-search-input::placeholder {

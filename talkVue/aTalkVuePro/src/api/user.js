@@ -27,3 +27,9 @@ export const findUserinfoByUserId= (id) =>{
 export const findPerPost=()=>{
     return request.get('sb/user/perpostcount');
 }
+export const findinterusers=()=>{
+    return request.get('sb/user/interusers');
+}
+export const findfans=()=>{
+    return request.get('sb/user/fans');
+}

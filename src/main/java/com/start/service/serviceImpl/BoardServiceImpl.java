@@ -34,4 +34,11 @@ public class BoardServiceImpl implements BoardService {
     public Board findBoardinfoById(Integer id) {
         return boardMapper.findBoardinfoById(id);
     }
+
+    @Override
+    public List<Board> findinterBoards() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer id = (Integer) map.get("id");
+        return boardMapper.findinterBoards(id);
+    }
 }

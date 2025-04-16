@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +75,16 @@ public class UserController {
     @GetMapping("/perpostcount")
     public Result<Integer> getuserinfobyid(){
         Integer cs= userService.findPerPost();
+        return Result.success(cs);
+    }
+    @GetMapping("/interusers")
+    public Result<List<User>> findinterusers(){
+        List<User> cs= userService.findinterusers();
+        return Result.success(cs);
+    }
+    @GetMapping("/fans")
+    public Result<List<User>> findfans(){
+        List<User> cs= userService.findfans();
         return Result.success(cs);
     }
 }

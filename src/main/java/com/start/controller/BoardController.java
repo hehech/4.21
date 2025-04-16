@@ -2,6 +2,7 @@ package com.start.controller;
 
 
 import com.start.entitle.Board;
+import com.start.entitle.Post;
 import com.start.entitle.Result;
 import com.start.mapper.BoardMapper;
 import com.start.service.BoardService;
@@ -35,6 +36,11 @@ public class BoardController {
     @GetMapping("/boardinfo")
     public Result<Board> findBoardinfoById(Integer id){
         Board cs=boardService.findBoardinfoById(id);
+        return Result.success(cs);
+    }
+    @GetMapping("/mytopic")
+    public Result<List<Board>> findinterBoards(){
+        List<Board> cs= boardService.findinterBoards();
         return Result.success(cs);
     }
 }

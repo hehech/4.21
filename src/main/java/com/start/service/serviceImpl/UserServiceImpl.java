@@ -8,8 +8,7 @@ import com.start.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -57,6 +56,20 @@ public class UserServiceImpl implements UserService {
         Map<String,Object> map= ThreadLocalUtil.get();
         Integer id = (Integer) map.get("id");
         return userMapper.getPerPostCount(id);
+    }
+
+    @Override
+    public List<User> findinterusers() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer id = (Integer) map.get("id");
+        return userMapper.findinterusers(id);
+    }
+
+    @Override
+    public List<User> findfans() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer id = (Integer) map.get("id");
+        return userMapper.findfans(id);
     }
 
 

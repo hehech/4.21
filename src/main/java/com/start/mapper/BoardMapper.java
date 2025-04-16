@@ -18,4 +18,9 @@ public interface BoardMapper {
 
     @Select("select * from \"board\" where \"board_id\"=#{id}")
     Board findBoardinfoById(Integer id);
+
+    @Select("SELECT b.* FROM \"board\" b " +
+            "INNER JOIN \"board_follows\" f ON b.\"board_id\" = f.\"board_id\" " +
+            "WHERE f.\"user_id\" = #{id}")
+    List<Board> findinterBoards(Integer id);
 }
