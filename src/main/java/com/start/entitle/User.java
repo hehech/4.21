@@ -40,4 +40,6 @@ public class User {
     private Long vipGrade;//vip等级
 
     private String address;
+
+    private String phoneNumber;
 }

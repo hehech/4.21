@@ -1,26 +1,25 @@
 <!-- 1. 在view文件夹下创建Login文件夹，Login文件夹下创建login.vue文件
 2.结合html+element构建页面 -->
 <script setup lang="ts">
-import { ref } from 'vue'// Vue 3 响应式声明
+import { ref ,computed} from 'vue'// Vue 3 响应式声明
 
 //注册数据模型
-const registerData=ref({
-    account:'',
-    password:'',
+const registerData = ref({
+  account: '',
+  password: '',
 })
 
 //数据校验规则
-const rules={
-    account:[
-        {required:true,message:"请输入账号",trigger:'blur'},
-        {min:8,max:16,message:"长度为8-16的非空字符",trigger:'blur'}
-    ],
-    password:[
-        {required:true,message:"请输入密码",trigger:'blur'},
-        {min:5,max:16,message:"长度为5-16的非空字符",trigger:'blur'}
-    ]
+const rules = {
+  account: [
+    { required: true, message: "请输入账号", trigger: 'blur' },
+    { min: 8, max: 16, message: "长度为8-16的非空字符", trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: 'blur' },
+    { min: 5, max: 16, message: "长度为5-16的非空字符", trigger: 'blur' }
+  ]
 }
-
 //调用登录接口
 //登录，复用注册的数据模型
 //表单数据校验
@@ -28,9 +27,9 @@ const rules={
 import { useTokenStore } from '@/stores/token.js'
 import { userLoginService } from '@/api/user'
 import { ElMessage } from 'element-plus'
-import {useRouter} from 'vue-router'//导入创建路由器函数
-const tokenStore=useTokenStore()
-const router =useRouter()
+import { useRouter } from 'vue-router'//导入创建路由器函数
+const tokenStore = useTokenStore()
+const router = useRouter()
 const login = async () => {
   try {
     const result = await userLoginService(registerData.value);
@@ -39,15 +38,15 @@ const login = async () => {
     router.push('/');
   } catch (error) {
     // 处理错误
-    const errMsg = error.response?.status 
+    const errMsg = error.response?.status
       ? `登录失败（状态码：${error.response.status}）`
       : error.message || '登录失败';
-      ElMessage.error(errMsg);
+    ElMessage.error(errMsg);
     console.error('登录错误详情:', error);
   }
 };
 
-const TurnToRegister=()=>{
+const TurnToRegister = () => {
   router.push('/regist');
 }
 
@@ -133,6 +132,65 @@ const options = {
   },
   detectRetina: true
 }
+
+//=================================================================================================================================
+const loginMethod = ref<'account' | 'phone'>('account'); // 默认显示账号密码登录
+
+const toggleLoginMethod = () => {
+  loginMethod.value = loginMethod.value === 'account' ? 'phone' : 'account';
+};
+//===================================================================================================================================
+//手机验证码登录
+const phonelogindata = ref({
+  phoneNumber: '',
+  code:''
+})
+
+const countdown = ref(0)
+const isCountingDown = computed(() => countdown.value > 0)
+
+// 发送验证码
+import {sendMessage} from '@/api/user.js'
+const sendVerificationCode = async () => {
+  if (!phonelogindata.value.phoneNumber) {
+    ElMessage.warning('请输入手机号码')
+    return
+  }
+
+  if (isCountingDown.value) return
+
+  try {
+    // 调用后端发送验证码接口
+    const rs= await sendMessage(phonelogindata.value.phoneNumber);
+    ElMessage.success('验证码已发送')
+    // 开始倒计时
+    countdown.value = 60
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+  } catch (error) {
+    ElMessage.error('发送验证码失败: ' + (error.response?.data?.message || error.message))
+  }
+}
+
+// 手机验证码登录
+const loginByPhone = async () => {
+  // if (!phonelogindata.value.phoneNumber || !phonelogindata.value.code) {
+  //   ElMessage.warning('请输入手机号和验证码')
+  //   return
+  // }
+
+  // try {
+  //   // 调用手机验证码登录接口
+  //   const rs= await phoneMsgLogin(phonelogindata.value);
+  //   // 处理登录成功逻辑
+  // } catch (error) {
+  //   ElMessage.error('登录失败: ' + (error.response?.data?.message || error.message))
+  // }
+}
 </script>
 
 
@@ -142,23 +200,55 @@ const options = {
     <!-- 背景 -->
     <Particles id="tsparticles" class="login__particles" :options="options" />
     <!-- 登录表单 -->
-    <div class="loginPart">
+    <div class="loginPart" v-if="loginMethod === 'account'">
       <h2>用户登录</h2>
-      <el-form status-icon label-width="100px" class="demo-ruleForm" style="transform:translate(-30px);" :model="registerData" :rules="rules">
+      <el-form status-icon label-width="100px" style="transform:translate(-30px);" :model="registerData" :rules="rules">
         <el-form-item label="账号：" prop="account">
-          <el-input placeholder="请输入账号"v-model="registerData.account" maxlength="20" clearable />
+          <el-input placeholder="请输入账号" v-model="registerData.account" maxlength="20" clearable />
         </el-form-item>
         <el-form-item label="密码：" prop="password">
-          <el-input type="password" placeholder="请输入密码"v-model="registerData.password" maxlength="20" show-password clearable />
+          <el-input type="password" placeholder="请输入密码" v-model="registerData.password" maxlength="20" show-password
+            clearable />
         </el-form-item>
         <!-- <el-form-item label="验证码：">
           <el-input  placeholder="请输入验证码" maxlength="20" clearable />
           <img class="verifyCodeImg">
         </el-form-item> -->
         <el-button class="btn" type="primary" @click="login">登录</el-button>
-        <div style="text-align: right;">
-          <el-link type="warning" @click="TurnToRegister">去注册</el-link>
-        </div>
+        <!-- 修改表单部分的代码 -->
+        <el-form-item>
+          <div class="form-links">
+            <el-link type="warning" @click="toggleLoginMethod">手机验证码登录</el-link>
+            <el-link type="warning" @click="TurnToRegister">去注册</el-link>
+          </div>
+        </el-form-item>
+      </el-form>
+    </div>
+    <!-- 手机验证码登录表单 -->
+    <div class="loginPart" v-else>
+      <h2>手机验证码登录</h2>
+      <el-form status-icon label-width="100px" style="transform:translate(-30px);">
+        <el-form-item label="手机号码：">
+          <div class="phone-input-container">
+            <el-input v-model="phonelogindata.phoneNumber" placeholder="请输入手机号码" maxlength="11" clearable class="phone-input" />
+            <el-link type="primary" @click="sendVerificationCode" :disabled="isCountingDown" class="get-code-link">
+              {{ countdown > 0 ? `${countdown}s后重新获取` : '获取验证码' }}
+            </el-link>
+          </div>
+        </el-form-item>
+
+        <el-form-item label="验证码：">
+          <el-input v-model="phonelogindata.code" placeholder="请输入验证码" maxlength="6" clearable class="code-input" />
+        </el-form-item>
+
+        <el-button class="btn" type="primary" @click="loginByPhone">登录</el-button>
+        <el-button class="btn1" type="primary" @click="toggleLoginMethod">返回</el-button>
+
+        <el-form-item>
+          <div class="form-links-single">
+            <el-link type="warning" @click="TurnToRegister">去注册</el-link>
+          </div>
+        </el-form-item>
       </el-form>
     </div>
   </div>
@@ -214,44 +304,117 @@ h2 {
 .btn {
   /* 1. 布局优化 */
   position: relative;
-  left: 100px; /* 替代 transform，更符合直觉的定位方式 */
+  left: 100px;
+  /* 替代 transform，更符合直觉的定位方式 */
   width: 250px;
   height: 30px;
-  
+
   /* 2. 视觉优化 */
-  background: #00d6af; /* 明确按钮背景色 */
-  border: 2px solid #00aab3; /* 深色边框增强对比 */
-  border-radius: 8px; /* 更柔和的圆角 */
-  color: white; /* 高对比度文字 */
-  font-size: 16px; /* 改善可读性 */
-  line-height: 40px; /* 垂直居中文字 */
-  padding: 0 15px; /* 内边距避免文字溢出 */
-  text-align: center; /* 水平居中（冗余但保险） */
-  
+  background: #00d6af;
+  /* 明确按钮背景色 */
+  border: 2px solid #00aab3;
+  /* 深色边框增强对比 */
+  border-radius: 8px;
+  /* 更柔和的圆角 */
+  color: white;
+  /* 高对比度文字 */
+  font-size: 16px;
+  /* 改善可读性 */
+  line-height: 40px;
+  /* 垂直居中文字 */
+  padding: 0 15px;
+  /* 内边距避免文字溢出 */
+  text-align: center;
+  /* 水平居中（冗余但保险） */
+
   /* 3. 交互优化 */
-  transition: 
+  transition:
     background 0.3s ease,
-    transform 0.2s ease; /* 平滑过渡效果 */
+    transform 0.2s ease;
+  /* 平滑过渡效果 */
   cursor: pointer;
-  
+
   /* 悬停状态 */
   &:hover:not(:disabled) {
     background: #00695e;
-    transform: translateY(-2px); /* 微妙上浮效果 */
-    box-shadow: 0 2px 8px rgba(0, 86, 187, 0.2); /* 投影增强立体感 */
+    transform: translateY(-2px);
+    /* 微妙上浮效果 */
+    box-shadow: 0 2px 8px rgba(0, 86, 187, 0.2);
+    /* 投影增强立体感 */
   }
-  
+
   /* 点击状态 */
   &:active:not(:disabled) {
     transform: translateY(0);
   }
-  
+
   /* 焦点状态（提升可访问性） */
   &:focus:not(:disabled) {
     outline: 2px solid #fff;
     outline-offset: 2px;
   }
-  
+
+  /* 禁用状态 */
+  &disabled {
+    background: #cccccc;
+    border-color: #aaa;
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+}
+
+.btn1 {
+  /* 1. 布局优化 */
+  margin: 10px 0 0 100px;
+  /* 替代 transform，更符合直觉的定位方式 */
+  width: 250px;
+  height: 30px;
+
+  /* 2. 视觉优化 */
+  background: #00d6af;
+  /* 明确按钮背景色 */
+  border: 2px solid #00aab3;
+  /* 深色边框增强对比 */
+  border-radius: 8px;
+  /* 更柔和的圆角 */
+  color: white;
+  /* 高对比度文字 */
+  font-size: 16px;
+  /* 改善可读性 */
+  line-height: 40px;
+  /* 垂直居中文字 */
+  padding: 0 15px;
+  /* 内边距避免文字溢出 */
+  text-align: center;
+  /* 水平居中（冗余但保险） */
+
+  /* 3. 交互优化 */
+  transition:
+    background 0.3s ease,
+    transform 0.2s ease;
+  /* 平滑过渡效果 */
+  cursor: pointer;
+
+  /* 悬停状态 */
+  &:hover:not(:disabled) {
+    background: #00695e;
+    transform: translateY(-2px);
+    /* 微妙上浮效果 */
+    box-shadow: 0 2px 8px rgba(0, 86, 187, 0.2);
+    /* 投影增强立体感 */
+  }
+
+  /* 点击状态 */
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  /* 焦点状态（提升可访问性） */
+  &:focus:not(:disabled) {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
   /* 禁用状态 */
   &disabled {
     background: #cccccc;
@@ -264,9 +427,76 @@ h2 {
 /* 4. 响应式优化（可选） */
 @media (max-width: 768px) {
   .btn {
-    left: 50%; /* 居中显示 */
+    left: 50%;
+    /* 居中显示 */
     transform: translateX(-50%);
-    width: 150px; /* 适应移动端屏幕 */
+    width: 150px;
+    /* 适应移动端屏幕 */
   }
+}
+
+.form-links {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+
+.form-links .el-link {
+  font-size: 14px;
+}
+
+.form-links .el-link:hover {
+  color: #00d6af;
+  text-decoration: underline;
+}
+
+.form-links-single {
+  display: flex;
+  justify-content: flex-end;
+  /* 将内容靠右对齐 */
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* 保持原有链接样式 */
+.form-links-single .el-link {
+  font-size: 14px;
+}
+
+.form-links-single .el-link:hover {
+  color: #00d6af;
+  text-decoration: underline;
+}
+
+/* 手机号码输入框容器 */
+.phone-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 手机号码输入框 */
+.phone-input {
+  flex: 1;
+}
+
+/* 获取验证码链接 */
+.get-code-link {
+  width: 120px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 验证码输入框 */
+.code-input {
+  width: 100%;
+}
+
+/* 禁用状态的获取验证码链接 */
+.get-code-link.is-disabled {
+  color: #c0c4cc;
+  cursor: not-allowed;
 }
 </style>

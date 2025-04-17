@@ -1,10 +1,14 @@
 package com.start.controller;
 
+import com.aliyuncs.utils.StringUtils;
 import com.start.entitle.Result;
 import com.start.entitle.User;
 import com.start.service.UserService;
 import com.start.utils.JwtUtil;
 import com.start.utils.Md5Util;
+import com.start.utils.SMSUtils;
+import com.start.utils.ValidateCodeUtils;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ValueOperations;
@@ -86,5 +90,25 @@ public class UserController {
     public Result<List<User>> findfans(){
         List<User> cs= userService.findfans();
         return Result.success(cs);
+    }
+
+
+    @PostMapping("/sendMsg")
+    public Result<String> sendMsg(@Pattern(regexp = "^\\S{11,11}$")String phoneNumber, HttpSession session){
+//      1.获取手机号
+
+        if(StringUtils.isEmpty(phoneNumber)){
+            return Result.error("短信发送失败");
+        }
+//      2.随机生成四位验证码
+        String code = ValidateCodeUtils.generateValidateCode(4).toString();
+
+//      3.调用阿里云提供的短信服务
+        SMSUtils.sendMessage("贺晨浩","",phoneNumber,code);
+
+//      4.需要将生成的验证码保存到session中
+        session.setAttribute(phoneNumber,code);
+
+        return Result.success("验证码短信发送成功");
     }
 }

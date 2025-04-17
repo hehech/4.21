@@ -16,6 +16,13 @@ export const userRegisterService =(registerData)=>{
     return request.post('/sb/user/regist',registerData);
 }
 
+//手机验证码登录
+export const sendMessage=(phoneNumber)=>{
+    const params=new URLSearchParams();
+    params.append('phoneNumber', phoneNumber)
+    return request.post('/sb/user/sendMsg',params);
+}
+
 //查找当前登录用户信息
 export const findUser=()=>{
     return request.get('sb/user/currentuser');

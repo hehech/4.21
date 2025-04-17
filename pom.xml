@@ -100,7 +100,18 @@
       <artifactId>ojdbc8</artifactId>
       <version>21.9.0.0</version>  <!-- 推荐使用此版本 -->
     </dependency>
+<!--手机验证依赖-->
+    <dependency>
+      <groupId>com.aliyun</groupId>
+      <artifactId>aliyun-java-sdk-core</artifactId>
+      <version>4.5.16</version>
+    </dependency>
 
+    <dependency>
+      <groupId>com.aliyun</groupId>
+      <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+      <version>2.1.0</version>
+    </dependency>
 
 
   </dependencies>
