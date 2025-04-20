@@ -31,4 +31,6 @@ public interface UserMapper {
             "INNER JOIN \"user_follows\" f ON u.\"user_id\" = f.\"follower_id\" " +
             "WHERE f.\"followee_id\" = #{id}")
     List<User> findfans(Integer id);
+    @Select("select * from \"user\" where \"phone_number\"=#{phoneNumber}")
+    User findUserByPhoneNumber(String phoneNumber);
 }

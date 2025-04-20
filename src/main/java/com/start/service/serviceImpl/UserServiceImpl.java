@@ -72,5 +72,10 @@ public class UserServiceImpl implements UserService {
         return userMapper.findfans(id);
     }
 
+    @Override
+    public User findUserByPhoneNumber(String phoneNumber) {
+        return userMapper.findUserByPhoneNumber(phoneNumber);
+    }
+
 
 }

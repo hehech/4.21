@@ -179,8 +179,6 @@ onUnmounted(() => {
             </div>
         </div>
 
-
-
         <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0">
             <div class="kapian" style="max-width: 1200px;width: 100%;">
                 <!-- 主信息区 -->

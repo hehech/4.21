@@ -1,14 +1,13 @@
 <!-- 1. 在view文件夹下创建Login文件夹，Login文件夹下创建login.vue文件
 2.结合html+element构建页面 -->
 <script setup lang="ts">
-import { ref ,computed} from 'vue'// Vue 3 响应式声明
+import { ref, computed } from 'vue'// Vue 3 响应式声明
 
 //注册数据模型
 const registerData = ref({
   account: '',
   password: '',
 })
-
 //数据校验规则
 const rules = {
   account: [
@@ -45,12 +44,9 @@ const login = async () => {
     console.error('登录错误详情:', error);
   }
 };
-
 const TurnToRegister = () => {
   router.push('/regist');
 }
-
-
 //样式
 const options = {
   fpsLimit: 60,
@@ -132,7 +128,6 @@ const options = {
   },
   detectRetina: true
 }
-
 //=================================================================================================================================
 const loginMethod = ref<'account' | 'phone'>('account'); // 默认显示账号密码登录
 
@@ -143,14 +138,14 @@ const toggleLoginMethod = () => {
 //手机验证码登录
 const phonelogindata = ref({
   phoneNumber: '',
-  code:''
+  code: ''
 })
 
 const countdown = ref(0)
 const isCountingDown = computed(() => countdown.value > 0)
 
 // 发送验证码
-import {sendMessage} from '@/api/user.js'
+import { sendMessage } from '@/api/user.js'
 const sendVerificationCode = async () => {
   if (!phonelogindata.value.phoneNumber) {
     ElMessage.warning('请输入手机号码')
@@ -161,7 +156,7 @@ const sendVerificationCode = async () => {
 
   try {
     // 调用后端发送验证码接口
-    const rs= await sendMessage(phonelogindata.value.phoneNumber);
+    const rs = await sendMessage(phonelogindata.value.phoneNumber);
     ElMessage.success('验证码已发送')
     // 开始倒计时
     countdown.value = 60
@@ -177,19 +172,30 @@ const sendVerificationCode = async () => {
 }
 
 // 手机验证码登录
+import {loginByPhoneApi} from '@/api/user.js'
 const loginByPhone = async () => {
-  // if (!phonelogindata.value.phoneNumber || !phonelogindata.value.code) {
-  //   ElMessage.warning('请输入手机号和验证码')
-  //   return
-  // }
+  if (!phonelogindata.value.phoneNumber) {
+    ElMessage.warning('请输入手机号码')
+    return
+  }
+  
+  if (!phonelogindata.value.code) {
+    ElMessage.warning('请输入验证码')
+    return
+  }
 
-  // try {
-  //   // 调用手机验证码登录接口
-  //   const rs= await phoneMsgLogin(phonelogindata.value);
-  //   // 处理登录成功逻辑
-  // } catch (error) {
-  //   ElMessage.error('登录失败: ' + (error.response?.data?.message || error.message))
-  // }
+  try {
+    // 调用手机验证码登录接口
+    const result = await loginByPhoneApi(phonelogindata.value);
+    
+    ElMessage.success(result.msg || '登录成功');
+    tokenStore.setToken(result.data);
+    router.push('/');
+  } catch (error) {
+    const errMsg = error.response?.data?.message || error.message || '登录失败';
+    ElMessage.error(errMsg);
+    console.error('手机登录错误详情:', error);
+  }
 }
 </script>
 
@@ -229,16 +235,20 @@ const loginByPhone = async () => {
       <h2>手机验证码登录</h2>
       <el-form status-icon label-width="100px" style="transform:translate(-30px);">
         <el-form-item label="手机号码：">
+
+          <el-input v-model="phonelogindata.phoneNumber" placeholder="请输入手机号码" maxlength="11" clearable
+            class="phone-input" />
+        </el-form-item>
+
+        <el-form-item label="验证码：">
           <div class="phone-input-container">
-            <el-input v-model="phonelogindata.phoneNumber" placeholder="请输入手机号码" maxlength="11" clearable class="phone-input" />
+            <el-input v-model="phonelogindata.code" placeholder="请输入验证码" maxlength="6" clearable class="code-input" />
             <el-link type="primary" @click="sendVerificationCode" :disabled="isCountingDown" class="get-code-link">
               {{ countdown > 0 ? `${countdown}s后重新获取` : '获取验证码' }}
             </el-link>
           </div>
-        </el-form-item>
 
-        <el-form-item label="验证码：">
-          <el-input v-model="phonelogindata.code" placeholder="请输入验证码" maxlength="6" clearable class="code-input" />
+
         </el-form-item>
 
         <el-button class="btn" type="primary" @click="loginByPhone">登录</el-button>

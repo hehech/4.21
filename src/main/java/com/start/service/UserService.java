@@ -1,6 +1,7 @@
 package com.start.service;
 
 import com.start.entitle.User;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface UserService {
     List<User> findinterusers();
 
     List<User> findfans();
+
+    User findUserByPhoneNumber(@Pattern(regexp = "^\\S{11,11}$") String phoneNumber);
 }

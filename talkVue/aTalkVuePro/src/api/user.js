@@ -40,3 +40,10 @@ export const findinterusers=()=>{
 export const findfans=()=>{
     return request.get('sb/user/fans');
 }
+export const loginByPhoneApi=(loginData)=>{
+    const params=new URLSearchParams();
+    for(let key in loginData){
+        params.append(key,loginData[key]);
+    }
+    return request.post('/sb/user/loginbyphone',params);
+}

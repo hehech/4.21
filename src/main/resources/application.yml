@@ -7,6 +7,10 @@ spring:
   jackson:
     time-zone: Asia/Shanghai
     date-format: yyyy-MM-dd HH:mm:ss
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 server:
   port: 7777
