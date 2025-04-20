@@ -77,5 +77,24 @@ public class UserServiceImpl implements UserService {
         return userMapper.findUserByPhoneNumber(phoneNumber);
     }
 
+    @Override
+    public void addfocususer(Integer id) {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer mid = (Integer) map.get("id");
+        userMapper.addfocususer(mid,id);
+    }
 
+    @Override
+    public void cancelFocusUser(Integer id) {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer mid = (Integer) map.get("id");
+        userMapper.cancelFocusUser(mid,id);
+    }
+
+    @Override
+    public List<Integer> findCurFocusU() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer mid = (Integer) map.get("id");
+        return userMapper.findCurFocusU(mid);
+    }
 }

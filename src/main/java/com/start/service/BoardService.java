@@ -13,4 +13,10 @@ public interface BoardService {
     Board findBoardinfoById(Integer id);
 
     List<Board> findinterBoards();
+
+    void doFocusBoard(Integer id);
+
+    void cancelfocusboard(Integer id);
+
+    List<Integer> findCurFocusB();
 }

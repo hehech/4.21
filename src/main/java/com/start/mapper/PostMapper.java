@@ -35,4 +35,6 @@ public interface PostMapper {
             "INNER JOIN \"collection\" c ON p.\"post_id\" = c.\"post_id\" " +
             "WHERE c.\"user_id\" = #{userId}")
     List<Post> findPersonalCollectPost(Integer userId);
+    @Select("SELECT * FROM \"post\" WHERE \"title\" LIKE #{sk} OR \"content\" LIKE #{sk}")
+    List<Post> searchpost(String sk);
 }

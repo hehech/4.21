@@ -1,6 +1,7 @@
 package com.start.controller;
 
 import com.aliyuncs.utils.StringUtils;
+import com.start.entitle.Floor;
 import com.start.entitle.Result;
 import com.start.entitle.User;
 import com.start.service.UserService;
@@ -67,7 +68,7 @@ public class UserController {
             String token = JwtUtil.genToken(claims);
             //把token放到redis中
             ValueOperations<String, String> ops=redisTemplate.opsForValue();
-            ops.set(token,token,1,TimeUnit.HOURS);
+            ops.set(token,token,10,TimeUnit.HOURS);
 
             return Result.success(token);
         } else {
@@ -172,5 +173,22 @@ public class UserController {
         redisTemplate.delete(CODE_PREFIX + phoneNumber);
 
         return Result.success(token);
+    }
+
+    @PostMapping("/addfocususer")
+    public Result addfocususer(Integer id) {
+        System.out.println("查询成功");
+        userService.addfocususer(id);
+        return Result.success();
+    }
+    @PostMapping("/cancelfocususer")
+    public Result cancelFocusUser(Integer id) {
+        userService.cancelFocusUser(id);
+        return Result.success();
+    }
+    @GetMapping("/curfocususer")
+    public Result<List<Integer>> findCurFocusU(){
+        List<Integer> cs= userService.findCurFocusU();
+        return Result.success(cs);
     }
 }

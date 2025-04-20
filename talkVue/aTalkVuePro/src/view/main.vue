@@ -11,7 +11,7 @@ const tokenStore = useTokenStore()
 const router = useRouter()
 
 const handleInputFocus = () => {
-  // 输入框聚焦时添加动画
+
 };
 
 
@@ -300,7 +300,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
-//==================================================================================================================================
+//=================================================================================================================================================
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const handleLogout = async () => {
@@ -328,6 +328,22 @@ const handleLogout = async () => {
     }
   }
 }
+//================================================================================================================================================
+const key = ref(''); // 用于绑定搜索输入框的值
+const handleSearch = () => {
+  console.log("传递前的key：",key.value);
+  if (!key.value.trim()) {
+    ElMessage.warning('请输入搜索内容');
+    return;
+  }
+  
+  router.push({
+    path: "/search",
+    query: {
+      key: key.value// 传递搜索关键词
+    }
+  });
+};
 </script>
 
 
@@ -414,12 +430,12 @@ const handleLogout = async () => {
           <el-row style="display: flex; align-items: center;">
             <!-- 输入框区域 -->
             <el-col :span="20" style="position: relative;">
-              <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" @focus="handleInputFocus" />
+              <input v-model="key" class="weibo-search-input" placeholder="大家都在搜：今日热门话题" @focus="handleInputFocus" />
             </el-col>
 
             <!-- 搜索按钮 -->
             <el-col :span="4">
-              <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+              <el-button class="weibo-search-btn" type="danger"@click="handleSearch">搜索</el-button>
             </el-col>
           </el-row>
         </el-form>

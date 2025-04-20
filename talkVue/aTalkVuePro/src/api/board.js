@@ -13,3 +13,13 @@ export const getBoardInfoById= (id) =>{
 export const findinterBoards=()=>{
     return request.get('sb/board/mytopic');
 }
+export const doFocusBoard= (id) =>{
+    return request.post('/sb/board/addfocusboard?id='+id);
+}
+export const cancelFocusBoard= (id) =>{
+    return request.post('/sb/board/cancelfocusboard?id='+id);
+}
+
+export const findCurFocusB=()=>{
+    return request.get('sb/board/curfocusboard');
+}

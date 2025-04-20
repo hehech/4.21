@@ -25,6 +25,10 @@ const routes = [
   {
     path: '/post',
     component: () => import('@/view/post.vue')
+  },
+  {
+    path:'/search',
+    component:()=>import('@/view/search.vue')
   }
 ]
 

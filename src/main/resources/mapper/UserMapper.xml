@@ -26,4 +26,15 @@
         FROM "user"
         WHERE "account" = #{account}
     </select>
+
+
+    <insert id="addfocususer" parameterType="Integer">
+        INSERT INTO "user_follows" (
+            "follower_id",
+            "followee_id"
+        ) VALUES (
+                     #{mid},
+                     #{fid}
+                 )
+    </insert>
 </mapper>

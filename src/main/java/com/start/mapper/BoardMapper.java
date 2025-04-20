@@ -1,6 +1,8 @@
 package com.start.mapper;
 
 import com.start.entitle.Board;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -23,4 +25,14 @@ public interface BoardMapper {
             "INNER JOIN \"board_follows\" f ON b.\"board_id\" = f.\"board_id\" " +
             "WHERE f.\"user_id\" = #{id}")
     List<Board> findinterBoards(Integer id);
+    @Select("SELECT * FROM \"board\" WHERE \"name\" LIKE #{sk}")
+    List<Board> searchboard(String sk);
+
+
+    @Insert("INSERT INTO \"board_follows\" (\"user_id\", \"board_id\") VALUES (#{uid}, #{id})")
+    void doFocusBoard(Integer uid,Integer id);
+    @Delete("DELETE FROM \"board_follows\" WHERE \"user_id\" = #{uid} AND \"board_id\" = #{id}")
+    void cancelfocusboard(Integer uid, Integer id);
+    @Select("select \"board_id\" from \"board_follows\" where \"user_id\"=#{uid}")
+    List<Integer> findCurFocusB(Integer uid);
 }

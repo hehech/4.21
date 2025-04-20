@@ -25,4 +25,10 @@ public interface UserService {
     List<User> findfans();
 
     User findUserByPhoneNumber(@Pattern(regexp = "^\\S{11,11}$") String phoneNumber);
+
+    void addfocususer(Integer id);
+
+    void cancelFocusUser(Integer id);
+
+    List<Integer> findCurFocusU();
 }

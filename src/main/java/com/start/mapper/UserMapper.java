@@ -1,9 +1,7 @@
 package com.start.mapper;
 
 import com.start.entitle.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -33,4 +31,15 @@ public interface UserMapper {
     List<User> findfans(Integer id);
     @Select("select * from \"user\" where \"phone_number\"=#{phoneNumber}")
     User findUserByPhoneNumber(String phoneNumber);
+
+    @Select("SELECT * FROM \"user\" WHERE \"nickname\" LIKE #{sk} OR \"user_id\" LIKE #{sk}")
+    List<User> searchuser(String sk);
+
+    void addfocususer(Integer mid,Integer fid);
+
+    @Delete("DELETE FROM \"user_follows\" WHERE \"follower_id\" = #{mid} AND \"followee_id\" = #{id}")
+    void cancelFocusUser(Integer mid,Integer id);
+
+    @Select("select \"followee_id\" from \"user_follows\" where \"follower_id\"=#{mid}")
+    List<Integer> findCurFocusU(Integer mid);
 }

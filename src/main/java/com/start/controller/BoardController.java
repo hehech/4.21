@@ -8,6 +8,7 @@ import com.start.mapper.BoardMapper;
 import com.start.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,6 +42,21 @@ public class BoardController {
     @GetMapping("/mytopic")
     public Result<List<Board>> findinterBoards(){
         List<Board> cs= boardService.findinterBoards();
+        return Result.success(cs);
+    }
+    @PostMapping("/addfocusboard")
+    public Result doFocusBoard(Integer id) {
+        boardService.doFocusBoard(id);
+        return Result.success();
+    }
+    @PostMapping("/cancelfocusboard")
+    public Result cancelfocusboard(Integer id) {
+        boardService.cancelfocusboard(id);
+        return Result.success();
+    }
+    @GetMapping("/curfocusboard")
+    public Result<List<Integer>> findCurFocusB(){
+        List<Integer> cs= boardService.findCurFocusB();
         return Result.success(cs);
     }
 }

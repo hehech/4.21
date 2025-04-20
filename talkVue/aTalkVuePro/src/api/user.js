@@ -47,3 +47,12 @@ export const loginByPhoneApi=(loginData)=>{
     }
     return request.post('/sb/user/loginbyphone',params);
 }
+export const doFocusUser= (id) =>{
+    return request.post('/sb/user/addfocususer?id='+id);
+}
+export const cancelFocusUser= (id) =>{
+    return request.post('/sb/user/cancelfocususer?id='+id);
+}
+export const findCurFocusU=()=>{
+    return request.get('sb/user/curfocususer');
+}

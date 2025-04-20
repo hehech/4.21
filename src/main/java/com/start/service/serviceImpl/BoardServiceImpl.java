@@ -41,4 +41,25 @@ public class BoardServiceImpl implements BoardService {
         Integer id = (Integer) map.get("id");
         return boardMapper.findinterBoards(id);
     }
+
+    @Override
+    public void doFocusBoard(Integer id) {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer uid = (Integer) map.get("id");
+        boardMapper.doFocusBoard(uid,id);
+    }
+
+    @Override
+    public void cancelfocusboard(Integer id) {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer uid = (Integer) map.get("id");
+        boardMapper.cancelfocusboard(uid,id);
+    }
+
+    @Override
+    public List<Integer> findCurFocusB() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        Integer uid = (Integer) map.get("id");
+        return boardMapper.findCurFocusB(uid);
+    }
 }
