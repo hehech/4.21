@@ -344,6 +344,13 @@ const handleSearch = () => {
     }
   });
 };
+//=====================================================
+const handleaccount=()=>{
+  console.log("点击了");
+  router.push({
+    path: "/accountinfo"
+  });
+}
 </script>
 
 
@@ -373,7 +380,7 @@ const handleSearch = () => {
             <el-button class="anniu-wode" type="primary">更多<el-icon><arrow-down /></el-icon></el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>账号设置</el-dropdown-item>
+                <el-dropdown-item @click="handleaccount">账号设置</el-dropdown-item>
                 <el-dropdown-item divided>问题反馈</el-dropdown-item>
                 <el-dropdown-item divided>切换账号</el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
