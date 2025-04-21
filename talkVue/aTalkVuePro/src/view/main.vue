@@ -625,8 +625,8 @@ const handleSearch = () => {
                 <span style="font-size: 14px; font-weight: bold; color: #f85959; width: 15px; text-align: center; ">{{
                   index
                   + 1 }} </span>
-                <span style="font-size: 13px;color: #333;margin-left: 1px;cursor: pointer;text-decoration: none;
-                             display: inline-block;max-width: 190px;white-space: nowrap;overflow: hidden;
+                <span style="font-size: 13px;color: #333;margin-left: 5px;cursor: pointer;text-decoration: none;
+                             display: inline-block;max-width: 170px;white-space: nowrap;overflow: hidden;
                              text-overflow: ellipsis;" @mouseenter="post.showUnderline_hot = true"
                   @mouseleave="post.showUnderline_hot = false"
                   :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"

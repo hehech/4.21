@@ -161,7 +161,7 @@ const handlemytopicClick = (id) => {
 }
 //=====================================================================================================================================
 //关注的人
-import {findinterusers} from '@/api/user.js'
+import { findinterusers } from '@/api/user.js'
 const interUser = ref([
   {
     userId: 1,
@@ -183,7 +183,7 @@ const getinterusers = async () => {
 };
 getinterusers();
 //================================================================================================================================
-import {findfans} from '@/api/user.js'
+import { findfans } from '@/api/user.js'
 const fans = ref([
   {
     userId: 1,
@@ -411,39 +411,44 @@ getfans();
             <h3 style="margin: 15px 0 0 30px;font-size: 16px;">
               关注话题
             </h3>
-            <!-- 置顶帖1 -->
-            <div style="display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;"
-              v-for="bd in mytopics" :key="bd.boardId">
-              <img :src="bd.avaterUrl || '../assets/tieba.png'" alt="icon" class="remenba">
 
-              <div style="flex: 1;">
-                <div
-                  style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
-                  <div style="display: flex; align-items: center;">
-                    <span
-                      style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;margin-left: 10px;"
-                      @click="handlemytopicClick(bd.boardId)" @mouseenter="bd.showUnderline = true"
-                      @mouseleave="bd.showUnderline = false"
-                      :style="{ textDecoration: bd.showUnderline ? 'underline' : 'none' }">{{
-                        bd.name }}</span>
-                    <!-- 回复数 -->
-                    <div style="display: flex;align-items: center;margin: 0 0 0 5px;">
-                      <img src="@/assets/yan.png" style="width:16px; height:16px; margin-right:-6px;">
-                      <!-- 负边距拉近距离 -->
-                      <div style="color:#999; font-size:14px; margin-left:4px; padding:0 5px;">
-                        {{ bd.viewCount }}
+            <template v-if="mytopics && mytopics.length > 0">
+              <!-- 话题列表 -->
+              <div style="display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;"
+                v-for="bd in mytopics" :key="bd.boardId">
+                <img :src="bd.avaterUrl || '../assets/tieba.png'" alt="icon" class="remenba">
+                <div style="flex: 1;">
+                  <div
+                    style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center;">
+                      <span
+                        style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;margin-left: 10px;"
+                        @click="handlemytopicClick(bd.boardId)" @mouseenter="bd.showUnderline = true"
+                        @mouseleave="bd.showUnderline = false"
+                        :style="{ textDecoration: bd.showUnderline ? 'underline' : 'none' }">{{
+                          bd.name }}</span>
+                      <!-- 回复数 -->
+                      <div style="display: flex;align-items: center;margin: 0 0 0 5px;">
+                        <img src="@/assets/yan.png" style="width:16px; height:16px; margin-right:-6px;">
+                        <div style="color:#999; font-size:14px; margin-left:4px; padding:0 5px;">
+                          {{ bd.viewCount }}
+                        </div>
                       </div>
+                      <p style="font-size:14px;color: #999;margin-left: 20px;">{{ bd.description }}</p>
                     </div>
-                    <p style="font-size:14px;color: #999;margin-left: 20px;">{{ bd.description }}</p>
+                    <span style="font-size: 12px; color: #d82100; position: relative; margin-right: 30px;">
+                      <img src="@/assets/wenzhangshu.png" alt="view icon"
+                        style="width: 16px; height: 16px; position: absolute; left: -20px; top: 0;">
+                      {{ bd.postCount }}
+                    </span>
                   </div>
-
-                  <span style="font-size: 12px; color: #d82100; position: relative; margin-right: 30px;">
-                    <img src="@/assets/wenzhangshu.png" alt="view icon"
-                      style="width: 16px; height: 16px; position: absolute; left: -20px; top: 0;">
-                    {{ bd.postCount }}
-                  </span>
                 </div>
               </div>
+            </template>
+
+            <!-- 无话题时的提示 -->
+            <div v-else style="padding: 30px; text-align: center; color: #999;">
+              暂无关注的话题哦~
             </div>
           </div>
           <!-- 右侧功能区 -->
@@ -453,15 +458,20 @@ getfans();
               <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
                 关注的人
               </div>
-              <div v-for="u in interUser" :key="u.userId"
-                style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
-                <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
-                  style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
-                <span style="font-size: 14px; font-weight: 500; cursor: pointer;"
-                  @mouseenter="u.showUnderline = true" @mouseleave="u.showUnderline = false"
-                  :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
-                  {{ u.nickname || '匿名用户' }}
-                </span>
+              <template v-if="interUser && interUser.length > 0">
+                <div v-for="u in interUser" :key="u.userId"
+                  style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
+                  <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
+                    style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
+                  <span style="font-size: 14px; font-weight: 500; cursor: pointer;" @mouseenter="u.showUnderline = true"
+                    @mouseleave="u.showUnderline = false"
+                    :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
+                    {{ u.nickname || '匿名用户' }}
+                  </span>
+                </div>
+              </template>
+              <div v-else style="padding: 20px; text-align: center; color: #999; background-color: #FFFF;">
+                暂无关注的人哦~
               </div>
             </div>
 
@@ -470,15 +480,21 @@ getfans();
               <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
                 我的粉丝
               </div>
-              <div v-for="u in fans" :key="u.userId"
-                style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
-                <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
-                  style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
-                <span style="font-size: 14px; font-weight: 500; cursor: pointer;"
-                  @mouseenter="u.showUnderline = true" @mouseleave="u.showUnderline = false"
-                  :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
-                  {{ u.nickname || '匿名用户' }}
-                </span>
+              <template v-if="interUser && interUser.length > 0">
+
+                <div v-for="u in fans" :key="u.userId"
+                  style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
+                  <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
+                    style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
+                  <span style="font-size: 14px; font-weight: 500; cursor: pointer;" @mouseenter="u.showUnderline = true"
+                    @mouseleave="u.showUnderline = false"
+                    :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
+                    {{ u.nickname || '匿名用户' }}
+                  </span>
+                </div>
+              </template>
+              <div v-else style="padding: 20px; text-align: center; color: #999; background-color: #FFFF;">
+                暂无粉丝哦~
               </div>
             </div>
           </div>
