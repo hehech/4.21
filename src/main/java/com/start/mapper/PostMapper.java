@@ -37,4 +37,6 @@ public interface PostMapper {
     List<Post> findPersonalCollectPost(Integer userId);
     @Select("SELECT * FROM \"post\" WHERE \"title\" LIKE #{sk} OR \"content\" LIKE #{sk}")
     List<Post> searchpost(String sk);
+
+    void addshoutie(Post p);
 }

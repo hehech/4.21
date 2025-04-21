@@ -14,4 +14,6 @@ public interface PostService {
     List<Post> getbapost(Integer id);
 
     List<Post> findPersonalCollectPost();
+
+    void addshoutie(Post p);
 }

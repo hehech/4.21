@@ -18,13 +18,28 @@ const bainfo = ref(
     }
 )
 const imageUrl = ref('')
+const activeTab = ref('createTopic') // 默认激活的tab
 
-import {addba} from '@/api/board.js'
-const submit=async()=>{
+import { addba } from '@/api/board.js'
+const submit = async () => {
     let rs = await addba(bainfo.value);
     ElMessage.success(rs.msg ? rs.msg : '发表成功');
-    bainfo.value=[];
-    imageUrl.value=''
+    bainfo.value = {};
+    imageUrl.value = ''
+}
+//===============================================================================================================================================
+const shoutieinfo = ref(
+    {
+        boardId:'',
+        title: "",
+        content: ""
+    }
+)
+import { addshoutie } from '@/api/post.js'
+const submitshoutie = async () => {
+    let rs = await addshoutie(shoutieinfo.value);
+    ElMessage.success(rs.msg ? rs.msg : '发表成功');
+    shoutieinfo.value = {};
 }
 //===============================================================================================================================================
 
@@ -75,63 +90,114 @@ const submit=async()=>{
             <div class="kapian" style="max-width: 1100px;width: 100%;">
                 <!-- 主信息区 -->
                 <div style="display: flex; flex-direction: column;background-color: #ffffff;">
-                    <h2 style="font-size: 24px; margin:30px 0 30px 30px; color: #333;">创建新话题</h2>
+                    <!-- 添加el-tabs -->
+                    <el-tabs v-model="activeTab" style="margin: 20px 30px 0 30px;">
+                        <el-tab-pane label="创建新话题" name="createTopic">
+                            <h2 style="font-size: 24px; margin:20px 0 30px 0; color: #333;">创建新话题</h2>
 
-                    <el-form label-position="top" style="max-width: 800px;margin:0 0 0 30px">
-                        <!-- 话题名称 -->
-                        <el-form-item label="话题名称" required>
-                            <el-input v-model="bainfo.name" placeholder="请输入话题名称（2-10个字符）" maxlength="20"
-                                show-word-limit style="width: 100%;"></el-input>
-                        </el-form-item>
+                            <el-form label-position="top" style="max-width: 800px;">
+                                <!-- 话题名称 -->
+                                <el-form-item label="话题名称" required>
+                                    <el-input v-model="bainfo.name" placeholder="请输入话题名称（2-10个字符）" maxlength="20"
+                                        show-word-limit style="width: 100%;"></el-input>
+                                </el-form-item>
 
-                        <!-- 话题描述 -->
-                        <el-form-item label="话题描述">
-                            <el-input v-model="bainfo.description" type="textarea" :rows="4"
-                                placeholder="请输入话题描述（可选，最多100字）" maxlength="200" show-word-limit
-                                style="width: 100%;"></el-input>
-                        </el-form-item>
+                                <!-- 话题描述 -->
+                                <el-form-item label="话题描述">
+                                    <el-input v-model="bainfo.description" type="textarea" :rows="4"
+                                        placeholder="请输入话题描述（可选，最多100字）" maxlength="200" show-word-limit
+                                        style="width: 100%;"></el-input>
+                                </el-form-item>
 
-                        <!-- 图片URL输入 -->
-                        <el-form-item label="话题封面图片URL">
-                            <el-input v-model="bainfo.avaterUrl" @input="imageUrl = bainfo.avaterUrl"
-                                placeholder="请输入图片URL" style="width: 100%;">
-                                <template #prepend>
-                                    <span style="color: #666;">http://</span>
-                                </template>
-                            </el-input>
+                                <!-- 图片URL输入 -->
+                                <el-form-item label="话题封面图片URL">
+                                    <el-input v-model="bainfo.avaterUrl" @input="imageUrl = bainfo.avaterUrl"
+                                        placeholder="请输入图片URL" style="width: 100%;">
+                                        <template #prepend>
+                                            <span style="color: #666;">http://</span>
+                                        </template>
+                                    </el-input>
 
-                            <!-- 图片预览区域 -->
-                            <div v-if="imageUrl" style="margin-top: 15px;">
-                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;">图片预览：</div>
-                                <img :src="imageUrl"
-                                    style="max-width: 100%; max-height: 200px; border: 1px solid #eee; border-radius: 4px;"
-                                    onerror="this.style.display='none'">
+                                    <!-- 图片预览区域 -->
+                                    <div v-if="imageUrl" style="margin-top: 15px;">
+                                        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">图片预览：</div>
+                                        <img :src="imageUrl"
+                                            style="max-width: 100%; max-height: 200px; border: 1px solid #eee; border-radius: 4px;"
+                                            onerror="this.style.display='none'">
+                                    </div>
+                                </el-form-item>
+                            </el-form>
+                            <!-- 提交按钮（放在tabs外面） -->
+                            <div style="margin: 0 30px 30px 0;">
+                                <el-button @click="submit" type="success" size="large"
+                                    style="width: 120px;">创建话题</el-button>
                             </div>
-                        </el-form-item>
+                        </el-tab-pane>
 
-                        <!-- 提交按钮 -->
-                        <el-form-item>
-                            <el-button @click="submit"type="success" size="large" style="width: 120px;">创建话题</el-button>
-                        </el-form-item>
-                    </el-form>
+                        <el-tab-pane label="创建话题首帖" name="createFirstPost">
+                            <h2 style="font-size: 24px; margin:20px 0 30px 0; color: #333;">创建话题首帖</h2>
+
+                            <el-form label-position="top" style="max-width: 800px;">
+                                <!-- 首帖话题id-->
+                                <el-form-item label="首帖话题id" required>
+                                    <el-input v-model="shoutieinfo.boardId" placeholder="请输入首帖话题id" maxlength="5"
+                                        show-word-limit style="width: 100%;">
+                                    </el-input>
+                                </el-form-item>
+
+                                <!-- 首帖标题 -->
+                                <el-form-item label="首帖标题" required>
+                                    <el-input v-model="shoutieinfo.title" placeholder="请输入首帖标题（5-30个字符）" maxlength="30"
+                                        show-word-limit style="width: 100%;">
+                                    </el-input>
+                                </el-form-item>
+
+                                <!-- 首帖内容 -->
+                                <el-form-item label="首帖内容" required>
+                                    <el-input v-model="shoutieinfo.content" type="textarea" :rows="8"
+                                        placeholder="请输入首帖内容（10-2000字）" maxlength="2000" show-word-limit
+                                        style="width: 100%;">
+                                    </el-input>
+                                    <div style="font-size: 12px; color: #999; margin-top: 5px;">
+                                        这是话题的第一个帖子，建议详细介绍话题背景和讨论方向
+                                    </div>
+                                </el-form-item>
+                            </el-form>
+                            <!-- 提交按钮（放在tabs外面） -->
+                            <div style="margin: 0 30px 30px 0;">
+                                <el-button @click="submitshoutie" type="success" size="large"
+                                    style="width: 120px;">创建话题首帖</el-button>
+                            </div>
+                        </el-tab-pane>
+                    </el-tabs>
+
+
                 </div>
-
-
             </div>
-
         </div>
     </el-container>
-
-
-
-
 </template>
 
 <style scoped>
+/* 原有样式保持不变，添加以下样式 */
+:deep(.el-tabs__item) {
+    font-size: 16px;
+    padding: 0 20px;
+    height: 50px;
+}
+
+:deep(.el-tabs__header) {
+    margin: 0;
+}
+
+:deep(.el-tabs__nav-wrap::after) {
+    height: 1px;
+    background-color: var(--el-border-color-light);
+}
+
 .suoyou {
     background-color: #eeefef;
     padding-top: 0px;
-    /* 根据导航栏实际高度调整 */
 }
 
 .no-data {
@@ -167,7 +233,6 @@ const submit=async()=>{
 
 .anniu-wode {
     padding: 12px 24px !important;
-
     background-color: #01aa8e;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -187,10 +252,8 @@ const submit=async()=>{
     width: 100%;
     height: 36px;
     padding-left: 20px;
-    /* 字体向右移动 */
     border: none;
     border-right: none;
-    /* 避免边框重叠 */
     border-radius: 30px 0 0 30px;
     font-size: 16px;
     outline: none;
@@ -215,17 +278,14 @@ const submit=async()=>{
     background: #02ffd5 !important;
 }
 
-/* placeholder 样式 */
 .weibo-search-input::placeholder {
     color: #8e8e8e;
     font-size: 16px;
 }
 
 .remenba1 {
-    /* 1. 禁用默认圆形裁剪 */
     border-radius: 5px;
     overflow: hidden;
-    /* 防止图片超出容器 */
 }
 
 .white-text {
@@ -242,12 +302,10 @@ const submit=async()=>{
     color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* 导航栏样式 */
 .toubu {
     transition: background-color 0.3s ease;
 }
 
-/* 返回按钮样式 */
 .anniu-wode {
     padding: 12px 24px !important;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -258,56 +316,21 @@ const submit=async()=>{
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .basicSS {
     background: #ffffff;
 }
 
 .custom-avatar {
-    /* 1. 禁用默认圆形裁剪 */
     border-radius: 0 !important;
     overflow: hidden;
-    /* 防止图片超出容器 */
 }
 
 .custom-avatar::before {
-    /* 2. 伪元素占满容器 */
     content: '';
     display: block;
     width: 100%;
     height: 100%;
-
-    /* 3. 图片填充策略：保持宽高比并完整显示 */
     background-size: contain;
-    /* 图片等比缩放填满容器 */
     background-repeat: no-repeat;
     background-position: center;
 }
@@ -322,16 +345,6 @@ const submit=async()=>{
 
 :deep(.el-tabs) {
     flex: 1;
-}
-
-:deep(.el-tabs__header) {
-    margin: 0;
-}
-
-:deep(.el-tabs__item) {
-    padding: 0 20px;
-    height: 50px;
-    line-height: 50px;
 }
 
 .search-input {

@@ -19,7 +19,7 @@ const goBack = () => {
 //吧信息显示
 const BaInfos = ref([
     {
-        name: '三国杀', description: '抗压背锅', avaterUrl: ''
+        boardId:'',name: '三国杀', description: '抗压背锅', avaterUrl: ''
     }
 ]);
 import { getBoardInfoById } from '@/api/board.js'
@@ -322,6 +322,7 @@ const getLposts = async (id) => {
 
 //接受外界面变量；
 onMounted(async () => {
+    await initFollow();
     //吧信息展示
     const boardId = route.query.boardId
     console.log("查询的 board_id:", boardId);
@@ -357,19 +358,65 @@ onUnmounted(() => {
 //============================================================================================
 const key = ref(''); // 用于绑定搜索输入框的值
 const handleSearch = () => {
-  console.log("传递前的key：",key.value);
-  if (!key.value.trim()) {
-    ElMessage.warning('请输入搜索内容');
-    return;
-  }
-  
-  router.push({
-    path: "/search",
-    query: {
-      key: key.value// 传递搜索关键词
+    console.log("传递前的key：", key.value);
+    if (!key.value.trim()) {
+        ElMessage.warning('请输入搜索内容');
+        return;
     }
-  });
+
+    router.push({
+        path: "/search",
+        query: {
+            key: key.value// 传递搜索关键词
+        }
+    });
 };
+
+
+//============================================================================================================================================
+import { doFocusBoard, cancelFocusBoard, findCurFocusB} from '@/api/board';
+let isFollowed = ref(false);
+const initFollow = async () => {
+    try {
+        // 1. 获取当前用户关注的贴吧ID列表
+        const focusResponse = await findCurFocusB();
+
+        // 检查关注列表是否成功获取
+        if (focusResponse.code !== 0) {
+            throw new Error(focusResponse.message || '获取关注贴吧列表失败');
+        }
+
+        // 2. 创建已关注贴吧ID的Set集合（直接使用数值数组）
+        const followedBoardIds = new Set(focusResponse.data); // 直接使用返回的数值数组
+        
+        // 3. 检查当前贴吧是否在已关注列表中
+        if (BaInfos.value.length > 0) {
+            const currentBoardId = BaInfos.value[0].boardId;
+            isFollowed.value = followedBoardIds.has(currentBoardId);
+        }
+    } catch (error) {
+        console.error('初始化关注状态失败:', error);
+        isFollowed.value = false; // 出错时默认设为未关注
+    }
+}
+const handlefocus_B = async (id) => {
+    try {
+        console.log("点击时isFollowed状态：",isFollowed.value);
+        if (isFollowed.value) {
+            // 如果已关注，执行取消关注
+            await cancelFocusBoard(id);
+            isFollowed.value = false;
+            ElMessage.success('已取消关注');
+        } else {
+            // 如果未关注，执行关注
+            await doFocusBoard(id);
+            isFollowed.value = true;
+            ElMessage.success('关注成功');
+        }
+    } catch (error) {
+        ElMessage.error('操作失败: ' + error.message);
+    }
+}
 </script>
 
 <template>
@@ -449,12 +496,12 @@ const handleSearch = () => {
                             </span>
                         </div>
                         <el-col :span="14" style="position: relative;">
-                            <input v-model="key"class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+                            <input v-model="key" class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
                         </el-col>
 
                         <!-- 搜索按钮 -->
                         <el-col :span="4">
-                            <el-button @click="handleSearch"class="weibo-search-btn" type="danger">搜索</el-button>
+                            <el-button @click="handleSearch" class="weibo-search-btn" type="danger">搜索</el-button>
                         </el-col>
                     </el-row>
                 </el-form>
@@ -475,10 +522,26 @@ const handleSearch = () => {
                     <!-- 中间标题和关注按钮 -->
                     <div style="display: flex; align-items: center; flex-grow: 1; margin-left: 15px;">
                         <h2 style="font-size: 18px; color: #333; margin: 0 12px 0 0;">{{ BaInfos[0].name }}</h2>
-                        <el-button class="anniu-wode" type="danger" size="small"
-                            style="height: 24px; line-height: 24px; padding: 0 8px;">
-                            +关注
-                        </el-button>
+                        <el-button @click="handlefocus_B(BaInfos[0].boardId)" style="margin:5px 0 0 10px;
+                padding: 8px 10px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;" :style="{
+                    background: isFollowed ? '#cccccc' :
+                        hover ? 'linear-gradient(to bottom, #5CBF60, #55b059)' :
+                            'linear-gradient(to bottom, #4CAF50, #45a049)',
+                    color: isFollowed ? '#666666' : 'white',
+                    boxShadow: hover && !isFollowed ? '0 3px 6px rgba(0,0,0,0.25)' : '0 2px 5px rgba(0,0,0,0.2)',
+                    border: isFollowed ? '1px solid #ddd' : 'none'
+                }" @mouseover="hover = true" @mouseleave="hover = false">
+                                    <span v-if="!isFollowed" style="margin-right: 4px">+</span>
+                                    {{ isFollowed ? '已关注' : '关注' }}
+                                </el-button>
                     </div>
                 </div>
                 <!-- 分页器部分 -->
@@ -533,11 +596,7 @@ const handleSearch = () => {
                                 <div style="margin-bottom: 15px; font-size: 16px; line-height: 1.6;">
                                     {{ post.content }}
                                 </div>
-                                <!-- 帖子图片 -->
-                                <div style="margin-bottom: 15px;">
-                                    <img src="@/assets/xiaoxin.jpg" alt="帖子图片"
-                                        style="width: 180px;height: 180px; border-radius: 4px;">
-                                </div>
+
 
                                 <!-- 底部信息栏和互动按钮组（水平布局） -->
                                 <div
@@ -599,11 +658,6 @@ const handleSearch = () => {
                                     v-html="post.content">
                                 </div>
 
-                                <!-- 帖子图片 -->
-                                <div style="margin-bottom: 15px;">
-                                    <img src="@/assets/xiaoxin.jpg" alt="帖子图片"
-                                        style="width: 180px;height: 180px; border-radius: 4px;">
-                                </div>
 
                                 <!-- 底部信息栏和互动按钮组（水平布局） -->
                                 <div
@@ -736,12 +790,16 @@ const handleSearch = () => {
 
                             <ol style="list-style: none; padding: 0; margin: 0;">
                                 <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5;"
-                                    v-for="post in HotPostInfos" :key="post.postId">
+                                    v-for="(post, index) in HotPostInfos" :key="post.postId">
                                     <div style="display: flex; align-items: center;">
                                         <span
-                                            style="font-size: 16px; font-weight: bold; color: #f85959; width: 24px; text-align: center; ">1</span>
-                                        <span style="font-size: 15px; color: #333; margin-left: 8px;
-                                            cursor: pointer;text-decoration: none;"
+                                            style="font-size: 14px; font-weight: bold; color: #f85959; width: 15px; text-align: center; ">{{
+                                                index
+                                                + 1 }} </span>
+                                        <span style="font-size: 14px; color: #333; margin-left: 8px;
+                                            cursor: pointer;text-decoration: none;
+                                            display: inline-block;max-width: 230px;white-space: nowrap;overflow: hidden;
+                                            text-overflow: ellipsis;" 
                                             @mouseenter="post.showUnderline_hot = true"
                                             @mouseleave="post.showUnderline_hot = false"
                                             :style="{ textDecoration: post.showUnderline_hot ? 'underline' : 'none' }"

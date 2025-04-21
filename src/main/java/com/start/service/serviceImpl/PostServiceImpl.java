@@ -7,6 +7,7 @@ import com.start.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -50,5 +51,25 @@ public class PostServiceImpl implements PostService {
         Map<String,Object> map= ThreadLocalUtil.get();
         Integer id = (Integer) map.get("id");
         return postMapper.findPersonalCollectPost(id);
+    }
+
+    @Override
+    public void addshoutie(Post p) {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        // Get the ID as Integer first
+        Integer id = (Integer) map.get("id");
+        // Then convert it to Long
+        Long uid = id.longValue();
+
+        p.setUserId(uid);
+        p.setCreateTime(new Date());
+        p.setLastUpdateTime(new Date());
+        p.setViewCount(0L);
+        p.setLikeCount(0L);
+        p.setIsEssence(0);
+        p.setIsDeleted(0);
+        p.setSortTime(new Date());
+        p.setFloorNumber(1L);
+        postMapper.addshoutie(p);
     }
 }

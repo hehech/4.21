@@ -7,9 +7,7 @@ import com.start.entitle.Result;
 import com.start.service.BoardService;
 import com.start.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,5 +47,10 @@ public class PostControl {
     public Result<List<Post>> findPersonalCollectPost(){
         List<Post> cs= postService.findPersonalCollectPost();
         return Result.success(cs);
+    }
+    @PostMapping("/shoutie")
+    public Result addshoutie(@RequestBody Post p) {
+        postService.addshoutie(p);
+        return Result.success();
     }
 }

@@ -28,3 +28,8 @@ export const findBaHotPosts= (id) =>{
 export const findPersonalCollectPost = () =>{
     return request.get('/sb/post/percollect');
 }
+
+
+export const addshoutie =(data)=>{
+    return request.post('/sb/post/shoutie',data);
+}

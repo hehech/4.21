@@ -37,4 +37,5 @@ public class Post {
     private Long floorNumber;//楼层
 
     private String content;//内容
+
 }
