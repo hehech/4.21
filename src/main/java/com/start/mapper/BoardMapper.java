@@ -35,4 +35,10 @@ public interface BoardMapper {
     void cancelfocusboard(Integer uid, Integer id);
     @Select("select \"board_id\" from \"board_follows\" where \"user_id\"=#{uid}")
     List<Integer> findCurFocusB(Integer uid);
+
+    void addba(Board board);
+    @Select("SELECT b.* FROM \"board\" b " +
+            "INNER JOIN \"board_follows\" f ON b.\"board_id\" = f.\"board_id\" " +
+            "WHERE f.\"user_id\" = #{id}")
+    List<Board> findotherfocusBoards(Integer id);
 }

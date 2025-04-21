@@ -33,6 +33,14 @@ const routes = [
   {
     path:'/accountinfo',
     component:()=>import('@/view/accountinfo.vue')
+  },
+  {
+    path:'/cboard',
+    component:()=>import('@/view/cboard.vue')
+  },
+  {
+    path:'/otherinfo',
+    component:()=>import('@/view/otherinfo.vue')
   }
 ]
 

@@ -1,5 +1,6 @@
 package com.start.service;
 
+import com.start.entitle.Post;
 import com.start.entitle.User;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.stereotype.Service;
@@ -31,4 +32,12 @@ public interface UserService {
     void cancelFocusUser(Integer id);
 
     List<Integer> findCurFocusU();
+
+    Integer findotherpost(Integer id);
+
+    List<Post> findotherPostinfo(Integer id);
+
+    List<User> findotherfocususers(Integer id);
+
+    List<User> findotherfans(Integer id);
 }

@@ -22,8 +22,13 @@ const SearchUsersinfo = ref([{
     showUnderline: false,
     isFollowed: false
 }])
-const handleTitleClick_U = () => {
-
+const handleTitleClick_U = (id) => {
+    router.push({
+    path: "/otherinfo",
+    query: {
+      userId: id
+    }
+  });
 }
 // 修改handlefocus_U函数
 import { doFocusUser, cancelFocusUser } from '@/api/user';

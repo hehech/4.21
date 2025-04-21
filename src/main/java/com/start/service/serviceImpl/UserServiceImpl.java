@@ -1,5 +1,6 @@
 package com.start.service.serviceImpl;
 
+import com.start.entitle.Post;
 import com.start.entitle.User;
 import com.start.mapper.UserMapper;
 import com.start.service.UserService;
@@ -96,5 +97,25 @@ public class UserServiceImpl implements UserService {
         Map<String,Object> map= ThreadLocalUtil.get();
         Integer mid = (Integer) map.get("id");
         return userMapper.findCurFocusU(mid);
+    }
+
+    @Override
+    public Integer findotherpost(Integer id) {
+        return userMapper.findotherpost(id);
+    }
+
+    @Override
+    public List<Post> findotherPostinfo(Integer id) {
+        return userMapper.findotherPostinfo(id);
+    }
+
+    @Override
+    public List<User> findotherfocususers(Integer id) {
+         return userMapper.findotherfocususers(id);
+    }
+
+    @Override
+    public List<User> findotherfans(Integer id) {
+        return userMapper.findotherfans(id);
     }
 }

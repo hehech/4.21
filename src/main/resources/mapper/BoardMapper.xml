@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.start.mapper.BoardMapper">
+
+    <insert id="addba" parameterType="com.start.entitle.Board">
+        insert into "board"(
+            "name",
+            "description",
+            "create_time",
+            "view_count",
+            "post_count",
+            "avater_url",
+            "follower_count"
+        )
+        values (
+                   #{name},
+                   #{description},
+                   #{createTime},
+                   #{viewCount},
+                   #{postCount},
+                   #{avaterUrl},
+                   #{followerCount}
+               )
+    </insert>
+</mapper>

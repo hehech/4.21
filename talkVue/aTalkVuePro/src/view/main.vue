@@ -74,7 +74,8 @@ const userinfo = ref({
   nickname: '',
   bio: '',
   vipGrade: '',
-  PostCount: 1
+  PostCount: 1,
+  isAdmin:0
 })
 const getUserInfo = async () => {
   try {
@@ -351,6 +352,14 @@ const handleaccount=()=>{
     path: "/accountinfo"
   });
 }
+//管理员
+const handlecontrol = () => {
+  if (userinfo.value.isAdmin !== 1) {
+    ElMessage.warning('当前用户无管理员权限');
+  } else {
+    router.push('/cboard');
+  }
+}
 </script>
 
 
@@ -381,8 +390,7 @@ const handleaccount=()=>{
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="handleaccount">账号设置</el-dropdown-item>
-                <el-dropdown-item divided>问题反馈</el-dropdown-item>
-                <el-dropdown-item divided>切换账号</el-dropdown-item>
+                <el-dropdown-item @click="handlecontrol" divided>管理员权限</el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>

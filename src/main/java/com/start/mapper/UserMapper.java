@@ -1,5 +1,6 @@
 package com.start.mapper;
 
+import com.start.entitle.Post;
 import com.start.entitle.User;
 import org.apache.ibatis.annotations.*;
 
@@ -42,4 +43,17 @@ public interface UserMapper {
 
     @Select("select \"followee_id\" from \"user_follows\" where \"follower_id\"=#{mid}")
     List<Integer> findCurFocusU(Integer mid);
+    @Select("SELECT COUNT(*) FROM \"post\" WHERE \"user_id\" = #{id}")
+    Integer findotherpost(Integer id);
+
+    @Select("SELECT * FROM \"post\" WHERE \"user_id\" = #{id}")
+    List<Post> findotherPostinfo(Integer id);
+    @Select("SELECT u.* FROM \"user\" u " +
+            "INNER JOIN \"user_follows\" f ON u.\"user_id\" = f.\"followee_id\" " +
+            "WHERE f.\"follower_id\" = #{id}")
+    List<User> findotherfocususers(Integer id);
+    @Select("SELECT u.* FROM \"user\" u " +
+            "INNER JOIN \"user_follows\" f ON u.\"user_id\" = f.\"follower_id\" " +
+            "WHERE f.\"followee_id\" = #{id}")
+    List<User> findotherfans(Integer id);
 }

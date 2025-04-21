@@ -19,4 +19,8 @@ public interface BoardService {
     void cancelfocusboard(Integer id);
 
     List<Integer> findCurFocusB();
+
+    void addba(Board board);
+
+    List<Board> findotherfocusBoards(Integer id);
 }

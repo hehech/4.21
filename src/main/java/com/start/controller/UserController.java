@@ -2,6 +2,7 @@ package com.start.controller;
 
 import com.aliyuncs.utils.StringUtils;
 import com.start.entitle.Floor;
+import com.start.entitle.Post;
 import com.start.entitle.Result;
 import com.start.entitle.User;
 import com.start.service.UserService;
@@ -189,6 +190,29 @@ public class UserController {
     @GetMapping("/curfocususer")
     public Result<List<Integer>> findCurFocusU(){
         List<Integer> cs= userService.findCurFocusU();
+        return Result.success(cs);
+    }
+    @GetMapping("/otherpost")
+    public Result<Integer> findotherpost(Integer id){
+        Integer cs= userService.findotherpost(id);
+        return Result.success(cs);
+    }
+
+    @GetMapping("/otherpostinfo")
+    public Result<List<Post>> findotherPostinfo(Integer id){
+        List<Post> cs= userService.findotherPostinfo(id);
+        return Result.success(cs);
+    }
+
+    @GetMapping("/otherfocususers")
+    public Result<List<User>> findotherfocususers(Integer id){
+        List<User> cs= userService.findotherfocususers(id);
+        return Result.success(cs);
+    }
+
+    @GetMapping("/otherfans")
+    public Result<List<User>> findotherfans(Integer id){
+        List<User> cs= userService.findotherfans(id);
         return Result.success(cs);
     }
 }

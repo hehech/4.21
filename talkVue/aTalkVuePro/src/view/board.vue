@@ -7,7 +7,7 @@ const hover = ref(false)
 const router = useRouter();
 //==================================================================================================================================================
 //搜索框变量
-const activeTab = ref('posts')
+const activeTab = ref('bapost')
 const searchText = ref('')
 //=================================================================================================================================================
 //我在本吧 信息展示
@@ -35,6 +35,24 @@ const handleTitleClick = (post) => {
         }  // 传递贴吧名称作为查询参数
     });
 }
+//==============================================================================================================================================
+const reposts = ref([
+    {
+        postId: 18, likeCount: 55, title: '你好', userId: 22, UserName: '和', showUnderline: false,
+        boardId: 1
+    }
+]);
+const findrebaPost = async (id) => {
+    try {
+        const rs = await findBaPost(id);
+        // 按点赞数降序排序
+        reposts.value = rs.data.sort((a, b) => b.likeCount - a.likeCount);
+    } catch (error) {
+        console.error("获取帖子失败:", error);
+        reposts.value = []; // 出错时清空数组
+    }
+};
+//temp:帖子跳转
 //==================================================================================================================================================
 //吧信息显示
 const BaInfos = ref([
@@ -60,9 +78,13 @@ const getBoardInfoByIdApi = async (id) => {
 onMounted(async () => {
     const boardId = route.query.boardId
     if (boardId) {
-        getBoardInfoByIdApi(boardId);
-        findBaPostApi(boardId);
-    } else { ElMessage.error("无boardId"); }
+        await getBoardInfoByIdApi(boardId);
+        await findBaPostApi(boardId);
+        await findrebaPost(boardId);
+        await initFollow(); // 初始化关注状态
+    } else { 
+        ElMessage.error("无boardId"); 
+    }
 })
 
 //================================================================================================================================================
@@ -88,6 +110,67 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
+//=============================================
+const key = ref(''); // 用于绑定搜索输入框的值
+const handleSearch = () => {
+    console.log("传递前的key：", key.value);
+    if (!key.value.trim()) {
+        ElMessage.warning('请输入搜索内容');
+        return;
+    }
+
+    router.push({
+        path: "/search",
+        query: {
+            key: key.value// 传递搜索关键词
+        }
+    });
+};
+//======================================================================
+//关注
+import { doFocusBoard, cancelFocusBoard, findCurFocusB} from '@/api/board';
+let isFollowed = ref(false);
+const initFollow = async () => {
+    try {
+        // 1. 获取当前用户关注的贴吧ID列表
+        const focusResponse = await findCurFocusB();
+
+        // 检查关注列表是否成功获取
+        if (focusResponse.code !== 0) {
+            throw new Error(focusResponse.message || '获取关注贴吧列表失败');
+        }
+
+        // 2. 创建已关注贴吧ID的Set集合（直接使用数值数组）
+        const followedBoardIds = new Set(focusResponse.data); // 直接使用返回的数值数组
+        
+        // 3. 检查当前贴吧是否在已关注列表中
+        if (BaInfos.value.length > 0) {
+            const currentBoardId = BaInfos.value[0].boardId;
+            isFollowed.value = followedBoardIds.has(currentBoardId);
+        }
+    } catch (error) {
+        console.error('初始化关注状态失败:', error);
+        isFollowed.value = false; // 出错时默认设为未关注
+    }
+}
+const handlefocus_B = async (id) => {
+    try {
+        console.log("点击时isFollowed状态：",isFollowed.value);
+        if (isFollowed.value) {
+            // 如果已关注，执行取消关注
+            await cancelFocusBoard(id);
+            isFollowed.value = false;
+            ElMessage.success('已取消关注');
+        } else {
+            // 如果未关注，执行关注
+            await doFocusBoard(id);
+            isFollowed.value = true;
+            ElMessage.success('关注成功');
+        }
+    } catch (error) {
+        ElMessage.error('操作失败: ' + error.message);
+    }
+}
 </script>
 
 <template>
@@ -132,7 +215,7 @@ onUnmounted(() => {
             <!-- 搜索主体区 -->
             <div style="width: 100%; max-width: 700px;padding: 10px;z-index: 1;">
                 <el-form>
-                    <el-row :span="5"style="display: flex; align-items: center;">
+                    <el-row :span="5" style="display: flex; align-items: center;">
                         <!-- 输入框区域 -->
                         <!-- 内容容器 - 添加半透明背景确保文字可读性 -->
                         <div style="padding: 20px;margin-bottom: 15px;z-index: 1;">
@@ -167,20 +250,20 @@ onUnmounted(() => {
                             </span>
                         </div>
                         <el-col :span="14" style="position: relative;">
-                            <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+                            <input v-model="key" class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
                         </el-col>
 
                         <!-- 搜索按钮 -->
                         <el-col :span="4">
-                            <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+                            <el-button @click="handleSearch" class="weibo-search-btn" type="danger">搜索</el-button>
                         </el-col>
                     </el-row>
                 </el-form>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0">
-            <div class="kapian" style="max-width: 1200px;width: 100%;">
+        <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0;min-height: 800px;">
+            <div class="kapian" style="max-width: 1100px;width: 100%;">
                 <!-- 主信息区 -->
                 <div style="">
                     <!-- 顶部背景区域 -->
@@ -194,25 +277,27 @@ onUnmounted(() => {
                         <div style="display: flex;flex-direction: column;  margin:0 0 0 220px">
                             <div style="display: flex;flex-direction: row;">
                                 <h2 style="margin: 0; font-size: 24px; color: #333;font-size: 25px;">{{ BaInfos[0].name
-                                    }}
+                                }}
                                 </h2>
-                                <el-button style="background: linear-gradient(to bottom, #4CAF50, #45a049);color: white;
-                            margin:7px 0 0 20px;
-                            padding: 8px 16px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            cursor: pointer;
-                            transition: all 0.3s ease;
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;" @mouseover="hover = true" @mouseleave="hover = false" :style="{
-                                background: hover ? 'linear-gradient(to bottom, #5CBF60, #55b059)' :
-                                    'linear-gradient(to bottom, #4CAF50, #45a049)',
-                                boxShadow: hover ? '0 3px 6px rgba(0,0,0,0.25)'
-                                    : '0 2px 5px rgba(0,0,0,0.2)'
-                            }">
-                                    <span style="margin-right: 4px">+</span>
-                                    关注
+                                <el-button @click="handlefocus_B(BaInfos[0].boardId)" style="margin:5px 0 0 10px;
+                padding: 8px 10px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;" :style="{
+                    background: isFollowed ? '#cccccc' :
+                        hover ? 'linear-gradient(to bottom, #5CBF60, #55b059)' :
+                            'linear-gradient(to bottom, #4CAF50, #45a049)',
+                    color: isFollowed ? '#666666' : 'white',
+                    boxShadow: hover && !isFollowed ? '0 3px 6px rgba(0,0,0,0.25)' : '0 2px 5px rgba(0,0,0,0.2)',
+                    border: isFollowed ? '1px solid #ddd' : 'none'
+                }" @mouseover="hover = true" @mouseleave="hover = false">
+                                    <span v-if="!isFollowed" style="margin-right: 4px">+</span>
+                                    {{ isFollowed ? '已关注' : '关注' }}
                                 </el-button>
                                 <div style="margin:10px 0 0 20px;">
                                     <el-tag type="info" size="large">关注:{{ BaInfos[0].viewCount }}</el-tag>
@@ -230,21 +315,64 @@ onUnmounted(() => {
                     <!-- 导航部件区域 -->
                     <div class="nav-container">
                         <el-tabs v-model="activeTab" stretch>
-                            <el-tab-pane label="看贴" name="posts"></el-tab-pane>
-                            <el-tab-pane label="图片" name="images"></el-tab-pane>
-                            <el-tab-pane label="吧主推荐" name="recommend"></el-tab-pane>
+                            <el-tab-pane label="文章" name="bapost"></el-tab-pane>
+                            <el-tab-pane label="推荐" name="recommend"></el-tab-pane>
                         </el-tabs>
-
-                        <el-input v-model="searchText" placeholder="吧内搜索" clearable class="search-input" />
                     </div>
 
                     <!-- 主内容区 -->
                     <div style="display: flex;">
                         <!-- 帖子列表 -->
-                        <div style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
+                        <div v-if="activeTab === 'bapost'"
+                            style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
+                            <!-- 当有帖子时显示帖子列表 -->
+                            <template v-if="PostInfos && PostInfos.length > 0">
+                                <!-- 置顶帖1 -->
+                                <div style="display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;"
+                                    v-for="post in PostInfos" :key="post.postId">
+                                    <!-- 回复数 -->
+                                    <div
+                                        style="width: 50px; text-align: center; color: #999; font-size: 14px; align-self: center;">
+                                        {{ post.likeCount }}
+                                    </div>
+
+                                    <div style="flex: 1;">
+                                        <div
+                                            style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <span
+                                                    style="background-color: #d82100; color: white; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-right: 8px;">置顶</span>
+                                                <span
+                                                    style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;"
+                                                    @click="handleTitleClick(post)"
+                                                    @mouseenter="post.showUnderline = true"
+                                                    @mouseleave="post.showUnderline = false"
+                                                    :style="{ textDecoration: post.showUnderline ? 'underline' : 'none' }">{{
+                                                        post.title }}</span>
+                                            </div>
+                                            <span
+                                                style="font-size: 12px; color: #d82100; position: relative; margin-right: 30px;">
+                                                <img src="@/assets/zuozhe.png" alt="view icon"
+                                                    style="width: 16px; height: 16px; position: absolute; left: -20px; top: 0;">
+                                                {{ post.userId }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- 当没有帖子时显示提示信息 -->
+                            <div v-else style="padding: 40px; text-align: center; color: #999;">
+                                暂时没有内容哦~
+                            </div>
+                        </div>
+
+                        <!-- 推荐列表 -->
+                        <div v-if="activeTab === 'recommend'"
+                            style="flex: 1; background-color: white; margin-right: 4px; margin-top: 1px;">
                             <!-- 置顶帖1 -->
                             <div style="display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;"
-                                v-for="post in PostInfos" :key="post.postId">
+                                v-for="post in reposts" :key="post.postId">
                                 <!-- 回复数 -->
                                 <div
                                     style="width: 50px; text-align: center; color: #999; font-size: 14px; align-self: center;">
@@ -275,58 +403,6 @@ onUnmounted(() => {
                             </div>
                         </div>
 
-                        <!-- 右侧功能区 -->
-                        <div style="display: flex;flex-direction: column;margin-top: 1px;">
-                            <div style="width: 280px;margin-bottom: 3px;">
-                                <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
-                                    我在贴吧</div>
-                                <div
-                                    style="background-color: white; border-radius: 4px; padding: 15px;display:flex; flex-direction: row;">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <el-avatar class="custom-avatar" style="width: 110px; height: 110px;">
-                                        </el-avatar>
-                                    </div>
-
-                                    <!-- VIP信息区（右侧） -->
-                                    <div style="display: flex; flex-direction: column;margin: 0 0 0 15px;">
-                                        <div style="margin-bottom: 12px;">
-                                            用户名
-                                        </div>
-                                        <div style="margin-bottom: 12px;">
-                                            帖子：1234
-                                        </div>
-                                        <div>
-                                            粉丝：567
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="width: 280px;">
-                                <div type="primary" style="background-color: #FFFF; padding:5px; font-weight: bold;">
-                                    本吧信息
-                                </div>
-                                <div
-                                    style="background-color: white; border-radius: 4px; padding: 15px;display:flex; flex-direction: column;">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <el-avatar class="custom-avatar" style="width: 110px; height: 110px;">
-                                        </el-avatar>
-                                        <div style="margin: 10px 0 10px 15px;">
-                                            吧主：
-                                        </div>
-                                    </div>
-
-                                    <!-- VIP信息区（右侧） -->
-                                    <div style="display: flex; flex-direction: column;">
-                                        <div style="margin-bottom: 10px;">
-                                            帖子：22
-                                        </div>
-                                        <div>
-                                            粉丝：567
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                     </div>
                 </div>

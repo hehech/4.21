@@ -23,3 +23,11 @@ export const cancelFocusBoard= (id) =>{
 export const findCurFocusB=()=>{
     return request.get('sb/board/curfocusboard');
 }
+
+export const addba =(data)=>{
+    return request.post('/sb/board/addba',data);
+}
+
+export const findotherfocusBoards=(id)=>{
+    return request.get('sb/board/otherfocusboard?id='+id);
+}

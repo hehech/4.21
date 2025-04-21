@@ -354,6 +354,22 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
+//============================================================================================
+const key = ref(''); // 用于绑定搜索输入框的值
+const handleSearch = () => {
+  console.log("传递前的key：",key.value);
+  if (!key.value.trim()) {
+    ElMessage.warning('请输入搜索内容');
+    return;
+  }
+  
+  router.push({
+    path: "/search",
+    query: {
+      key: key.value// 传递搜索关键词
+    }
+  });
+};
 </script>
 
 <template>
@@ -433,12 +449,12 @@ onUnmounted(() => {
                             </span>
                         </div>
                         <el-col :span="14" style="position: relative;">
-                            <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+                            <input v-model="key"class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
                         </el-col>
 
                         <!-- 搜索按钮 -->
                         <el-col :span="4">
-                            <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+                            <el-button @click="handleSearch"class="weibo-search-btn" type="danger">搜索</el-button>
                         </el-col>
                     </el-row>
                 </el-form>

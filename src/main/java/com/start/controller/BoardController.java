@@ -2,15 +2,13 @@ package com.start.controller;
 
 
 import com.start.entitle.Board;
+import com.start.entitle.Floor;
 import com.start.entitle.Post;
 import com.start.entitle.Result;
 import com.start.mapper.BoardMapper;
 import com.start.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -57,6 +55,18 @@ public class BoardController {
     @GetMapping("/curfocusboard")
     public Result<List<Integer>> findCurFocusB(){
         List<Integer> cs= boardService.findCurFocusB();
+        return Result.success(cs);
+    }
+
+    @PostMapping("/addba")
+    public Result addfloor(@RequestBody Board board) {
+        boardService.addba(board);
+        return Result.success();
+    }
+
+    @GetMapping("/otherfocusboard")
+    public Result<List<Board>> findotherfocusBoards(Integer id){
+        List<Board> cs= boardService.findotherfocusBoards(id);
         return Result.success(cs);
     }
 }

@@ -24,4 +24,6 @@ public class Board {
     private Long postCount;
 
     private String avaterUrl;
+
+    private Long followerCount;
 }

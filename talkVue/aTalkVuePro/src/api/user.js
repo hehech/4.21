@@ -56,3 +56,18 @@ export const cancelFocusUser= (id) =>{
 export const findCurFocusU=()=>{
     return request.get('sb/user/curfocususer');
 }
+export const findotherpost=(id)=>{
+    return request.get('sb/user/otherpost?id='+id);
+}
+
+export const findotherPostinfo= (id) =>{
+    return request.get('/sb/user/otherpostinfo?id='+id);
+}
+
+export const findotherfocususers=(id)=>{
+    return request.get('sb/user/otherfocususers?id='+id);
+}
+
+export const findotherfans=(id)=>{
+    return request.get('sb/user/otherfans?id='+id);
+}

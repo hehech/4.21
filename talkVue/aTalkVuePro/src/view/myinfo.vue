@@ -203,7 +203,29 @@ const getfans = async () => {
     console.error('获取用户信息失败:', error);
   }
 };
+const auditinfo=()=>{
+  router.push({
+    path: "/accountinfo"
+  });
+}
 getfans();
+
+//=======================================================================
+const key = ref(''); // 用于绑定搜索输入框的值
+const handleSearch = () => {
+  console.log("传递前的key：",key.value);
+  if (!key.value.trim()) {
+    ElMessage.warning('请输入搜索内容');
+    return;
+  }
+  
+  router.push({
+    path: "/search",
+    query: {
+      key: key.value// 传递搜索关键词
+    }
+  });
+};
 </script>
 
 <template>
@@ -284,12 +306,12 @@ getfans();
               </span>
             </div>
             <el-col :span="14" style="position: relative;">
-              <input class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+              <input v-model="key"class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
             </el-col>
 
             <!-- 搜索按钮 -->
             <el-col :span="4">
-              <el-button class="weibo-search-btn" type="danger">搜索</el-button>
+              <el-button @click="handleSearch"class="weibo-search-btn" type="danger">搜索</el-button>
             </el-col>
           </el-row>
         </el-form>
@@ -303,7 +325,7 @@ getfans();
       <div class="kapian" style="max-width: 1150px;width: 100%;">
         <!-- 顶部背景区域 -->
         <div style="height: 130px;background: linear-gradient(60deg, #64b3f4 0%, #c2e59c 100%); position: relative;">
-          <el-button class="anniu-wode"
+          <el-button class="anniu-wode" @click="auditinfo"
             style="position: absolute; left: 230px; bottom: 10px;font-size: 14px;">编辑资料</el-button>
           <el-avatar class="custom-avatar" :size="150" :src="userinfo.avaterUrl || '@/assets/tieba.png'"
             style="position: absolute; left: 50px; bottom: -110px; border: 4px solid white;"></el-avatar>
