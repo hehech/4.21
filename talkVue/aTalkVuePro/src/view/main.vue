@@ -364,7 +364,7 @@ const handlecontrol = () => {
 
 
 <template>
-  <el-container class="suoyou" style="display: flex;flex-direction: column;">
+  <el-container class="suoyou" style="display: flex;flex-direction: column;min-height: 1000px;">
     <!-- 头部区域 -->
     <el-header class="toubu" style="display: flex; justify-content: space-between; align-items: center;" :style="{
       position: 'fixed',

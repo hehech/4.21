@@ -159,10 +159,6 @@ const options = {
         <el-form-item  prop="RePassword">
           <el-input type="password" placeholder="再次输入密码"v-model="registerData.RePassword" maxlength="20" show-password clearable />
         </el-form-item>
-        <!-- <el-form-item label="验证码：">
-          <el-input  placeholder="请输入验证码" maxlength="20" clearable />
-          <img class="verifyCodeImg">
-        </el-form-item> -->
         <el-button class="btn" type="primary" @click="register">注册</el-button>
         <div style="text-align: right;">
           <el-link @click="ReturnToLogin">返回</el-link>
@@ -184,7 +180,7 @@ const options = {
   width: 100%;
   background-size: cover;
   background-repeat: no-repeat;
-  background-image: url('@/assets/bg1.jpg');
+  background-image: url('@/assets/allbg.jpg');
   opacity: 0.9;
   position: fixed;
   pointer-events: none;

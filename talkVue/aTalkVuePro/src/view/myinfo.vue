@@ -203,7 +203,7 @@ const getfans = async () => {
     console.error('获取用户信息失败:', error);
   }
 };
-const auditinfo=()=>{
+const auditinfo = () => {
   router.push({
     path: "/accountinfo"
   });
@@ -213,16 +213,40 @@ getfans();
 //=======================================================================
 const key = ref(''); // 用于绑定搜索输入框的值
 const handleSearch = () => {
-  console.log("传递前的key：",key.value);
+  console.log("传递前的key：", key.value);
   if (!key.value.trim()) {
     ElMessage.warning('请输入搜索内容');
     return;
   }
-  
+
   router.push({
     path: "/search",
     query: {
       key: key.value// 传递搜索关键词
+    }
+  });
+};
+const touser = (id) => {
+  router.push({
+    path: "/otherinfo",
+    query: {
+      userId: id// 传递搜索关键词
+    }
+  });
+}
+
+let r1 = ref("");
+const sousuoyonghu = () => {
+  console.log("传递前的key：", r1.value);
+  if (!r1.value.trim()) {
+    ElMessage.warning('请输入搜索内容');
+    return;
+  }
+
+  router.push({
+    path: "/search",
+    query: {
+      key: r1.value// 传递搜索关键词
     }
   });
 };
@@ -306,12 +330,12 @@ const handleSearch = () => {
               </span>
             </div>
             <el-col :span="14" style="position: relative;">
-              <input v-model="key"class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
+              <input v-model="key" class="weibo-search-input" placeholder="大家都在搜：今日热门话题" />
             </el-col>
 
             <!-- 搜索按钮 -->
             <el-col :span="4">
-              <el-button @click="handleSearch"class="weibo-search-btn" type="danger">搜索</el-button>
+              <el-button @click="handleSearch" class="weibo-search-btn" type="danger">搜索</el-button>
             </el-col>
           </el-row>
         </el-form>
@@ -355,7 +379,8 @@ const handleSearch = () => {
             <el-tab-pane label="关注话题" name="mytopic"></el-tab-pane>
           </el-tabs>
 
-          <el-input placeholder="用户搜索" clearable class="search-input" />
+
+          <el-input v-model="r1" @keyup.enter="sousuoyonghu" class="search-input" placeholder="用户搜索" clearable />
         </div>
 
         <!-- 主内容区 -->
@@ -485,8 +510,8 @@ const handleSearch = () => {
                   style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; background-color: #FFFF;">
                   <el-avatar :src="u.avaterUrl || '@/assets/tieba.png'" class="remenba1"
                     style="width: 40px; height: 40px; margin-right: 10px;"></el-avatar>
-                  <span style="font-size: 14px; font-weight: 500; cursor: pointer;" @mouseenter="u.showUnderline = true"
-                    @mouseleave="u.showUnderline = false"
+                  <span @click="touser(u.userId)" style="font-size: 14px; font-weight: 500; cursor: pointer;"
+                    @mouseenter="u.showUnderline = true" @mouseleave="u.showUnderline = false"
                     :style="{ textDecoration: u.showUnderline ? 'underline' : 'none' }">
                     {{ u.nickname || '匿名用户' }}
                   </span>

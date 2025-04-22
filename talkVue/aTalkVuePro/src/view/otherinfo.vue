@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router'  // 必须添加这行
+import { ElMessage } from 'element-plus'
 const route = useRoute();
 const router = useRouter();
 
@@ -214,7 +215,7 @@ const handleSearch = () => {
     });
 };
 //=====================================================================================================================================
-import { doFocusUser, cancelFocusUser,findCurFocusU } from '@/api/user.js';
+import { doFocusUser, cancelFocusUser, findCurFocusU } from '@/api/user.js';
 let isFollowed = ref(false);
 const initFollow = async () => {
     try {
@@ -230,9 +231,9 @@ const initFollow = async () => {
         const followedBoardIds = new Set(focusResponse.data); // 直接使用返回的数值数组
 
         // 3. 检查当前贴吧是否在已关注列表中
-        if (userinfo.value.length > 0) {
-            const currentBoardId = userinfo.userId;
-            isFollowed.value = followedBoardIds.has(currentBoardId);
+        // 修正后
+        if (userinfo.value?.userId) {  // ✅ 检查userId是否存在
+            isFollowed.value = followedBoardIds.has(userinfo.value.userId);  // ✅ 正确访问
         }
     } catch (error) {
         console.error('初始化关注状态失败:', error);
@@ -390,13 +391,13 @@ const handlefocus_U = async (id) => {
                         <div style="margin:10px 0 0 0;">
                             <el-tag type="info" size="large">用户名：{{ userinfo.nickname }}</el-tag>
                             <el-tag style="margin:0 0 0 20px;" type="info" size="large">vip等级：{{ userinfo.vipGrade
-                            }}</el-tag>
+                                }}</el-tag>
                             <el-tag style="margin:0 0 0 20px;" type="info" size="large">吧龄：{{ userinfo.vipGrade
-                            }}年</el-tag>
+                                }}年</el-tag>
                             <el-tag style="margin:0 0 0 20px;" type="info" size="large">发帖：{{ userinfo.PostCount
-                            }}</el-tag>
+                                }}</el-tag>
                             <el-tag style="margin:0 0 0 20px;" type="info" size="large">地址：{{ userinfo.address
-                            }}</el-tag>
+                                }}</el-tag>
                         </div>
                         <span style="margin: 10px 0 0 0;font-size: 14px;">个性签名：{{ userinfo.bio }}</span>
                     </div>
@@ -486,7 +487,7 @@ const handlefocus_U = async (id) => {
                                                 </div>
                                             </div>
                                             <p style="font-size:14px;color: #999;margin-left: 20px;">{{ bd.description
-                                            }}</p>
+                                                }}</p>
                                         </div>
                                         <span
                                             style="font-size: 12px; color: #d82100; position: relative; margin-right: 30px;">

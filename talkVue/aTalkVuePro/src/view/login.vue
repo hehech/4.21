@@ -147,6 +147,7 @@ const isCountingDown = computed(() => countdown.value > 0)
 // 发送验证码
 import { sendMessage } from '@/api/user.js'
 const sendVerificationCode = async () => {
+  countdown.value=0;
   if (!phonelogindata.value.phoneNumber) {
     ElMessage.warning('请输入手机号码')
     return
