@@ -15,7 +15,7 @@
             values (
                     #{floorId},
                     #{userId},
-                    #{parentCommentId},
+                    #{parentCommentId, jdbcType=INTEGER},
                     #{content},
                     #{createTime}
                    )

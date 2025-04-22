@@ -118,4 +118,15 @@ public class UserServiceImpl implements UserService {
     public List<User> findotherfans(Integer id) {
         return userMapper.findotherfans(id);
     }
+
+    @Override
+    public void changepassword(Integer id,String newpassword) {
+        String md5String = Md5Util.getMD5String(newpassword);
+        userMapper.changepassword(id,md5String);
+    }
+
+    @Override
+    public void saveinfo(Integer userId, String nickname, String avaterUrl, String bio, String address) {
+        userMapper.saveinfo(userId,nickname,avaterUrl,bio,address);
+    }
 }

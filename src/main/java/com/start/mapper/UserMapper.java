@@ -56,4 +56,14 @@ public interface UserMapper {
             "INNER JOIN \"user_follows\" f ON u.\"user_id\" = f.\"follower_id\" " +
             "WHERE f.\"followee_id\" = #{id}")
     List<User> findotherfans(Integer id);
+
+    @Update("UPDATE \"user\" SET \"password\" = #{md5String} WHERE \"user_id\" = #{id}")
+    void changepassword(@Param("id") Integer id, @Param("md5String") String md5String);
+    @Update("UPDATE \"user\" SET " +
+            "\"nickname\" = #{nickname}, " +
+            "\"avater_url\" = #{avaterUrl}, " +
+            "\"bio\" = #{bio}, " +
+            "\"ADDRESS\" = #{address} " +
+            "WHERE \"user_id\" = #{userId}")
+    void saveinfo(Integer userId, String nickname, String avaterUrl, String bio, String address);
 }

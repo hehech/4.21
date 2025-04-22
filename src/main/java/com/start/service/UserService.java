@@ -40,4 +40,8 @@ public interface UserService {
     List<User> findotherfocususers(Integer id);
 
     List<User> findotherfans(Integer id);
+
+    void changepassword(Integer id,@Pattern(regexp = "^\\S{8,16}$") String newpassword);
+
+    void saveinfo(Integer userId, String nickname, String avaterUrl, String bio, String address);
 }

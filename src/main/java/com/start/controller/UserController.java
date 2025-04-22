@@ -215,4 +215,65 @@ public class UserController {
         List<User> cs= userService.findotherfans(id);
         return Result.success(cs);
     }
+
+
+    @PostMapping("/changepassword")
+    public Result<String> changepassword(
+            @RequestParam @Pattern(regexp = "^\\S{8,16}$") String oldPassword,
+            @RequestParam @Pattern(regexp = "^\\S{8,16}$") String newPassword,
+            @RequestParam @Pattern(regexp = "^\\S{8,16}$") String confirmPassword,
+            @RequestHeader("Authorization") String token) {
+
+        // 1. 验证新密码和确认密码是否一致
+        if (!newPassword.equals(confirmPassword)) {
+            return Result.error("新密码与确认密码不一致");
+        }
+
+        // 2. 验证新旧密码是否相同
+        if (oldPassword.equals(newPassword)) {
+            return Result.error("新密码不能与旧密码相同");
+        }
+
+        // 3. 获取当前用户
+        User loginUser = userService.getCurrentUser();
+        if (loginUser == null) {
+            return Result.error("用户未登录");
+        }
+
+        // 4. 验证旧密码是否正确
+        if (!Md5Util.getMD5String(oldPassword).equals(loginUser.getPassword())) {
+            return Result.error("原密码输入错误");
+        }
+
+        try {
+            // 5. 更新密码
+            Integer userId = ((Number)loginUser.getUserId()).intValue();
+
+            userService.changepassword(userId,newPassword);
+
+            // 6. 从Redis中删除token，强制用户重新登录
+            if (token != null) {
+                redisTemplate.delete(token);
+            }
+
+            // 7. 返回成功信息
+            return Result.success("密码修改成功，请重新登录");
+
+        } catch (Exception e) {
+            // 8. 错误处理
+            return Result.error("密码修改失败：" + e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/changeinfo")
+    public Result<String> saveinfo(
+            @RequestParam Integer userId,
+            @RequestParam String nickname,
+            @RequestParam String avaterUrl,
+            @RequestParam String bio,
+            @RequestParam String address) {
+        userService.saveinfo(userId,nickname,avaterUrl,bio,address);
+        return Result.success();
+    }
 }

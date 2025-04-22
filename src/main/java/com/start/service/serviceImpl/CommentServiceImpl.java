@@ -27,6 +27,7 @@ public class CommentServiceImpl implements CommentService {
         Long userId = ((Number) map.get("id")).longValue();
         comt.setUserId(userId);
         comt.setCreateTime(new Date());
+        System.out.println(comt.toString());
         commentMapper.insert(comt);
     }
 }

@@ -235,7 +235,7 @@ const ShowComment = async (floorId) => {
 const CommentModel = ref(
     {
         floorId: 1,
-        parentCommentId: 2,
+        parentCommentId: null,
         content: ''
     }
 )

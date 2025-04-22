@@ -1,397 +1,410 @@
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
-import { findUser} from '@/api/user.js'
-import { ElMessage, ElDialog } from 'element-plus'
-
-// 隐私设置响应式对象
-const privacySettings = reactive({
-  profileVisible: 0,
-  postVisible: 0
-})
-
-// 导航项配置
-const navItems = [
-  { key: 'security', label: '账号安全' },
-  { key: 'security', label: '账号安全' },
-  { key: 'privacy', label: '隐私设置' },
-  { key: 'notification', label: '消息通知' }
-]
-
-// 用户数据
-const isDark = ref(false)
-const activeNav = ref('security')
-const userData = ref({
-  account: '',
-  password: '',
-  avatarUrl: '',
-  nickname: '',
-  bio: '',
-  RePassword: ''
-})
-
-// 帮助相关数据
-const helpDialogVisible = ref(false)
-const currentHelp = ref({
-  title: '',
-  content: ''
-})
-
-const helpOptions = [
-  {
-    key: 'password',
-    label: '如何修改密码？',
-    title: '密码修改指南',
-    content: '1. 进入账号安全页面\n2. 点击「修改密码」按钮\n3. 通过手机验证后设置新密码'
-  },
-  {
-    key: 'login',
-    label: '登录异常处理',
-    title: '登录问题解决',
-    content: '1. 检查网络连接\n2. 清除浏览器缓存\n3. 联系客服人员'
-  },
-  {
-    key: 'appeal',
-    label: '账号申诉指南',
-    title: '账号申诉流程',
-    content: '1. 准备身份证明\n2. 填写申诉表单\n3. 等待审核结果'
-  },
-  {
-    key: 'delete',
-    label: '注销账号说明',
-    title: '账号注销协议',
-    content: '1. 备份重要数据\n2. 确认注销操作\n3. 完成最终验证'
-  }
-]
-
-// 密码修改相关数据
-const passwordDialogVisible = ref(false)
-const passwordForm = reactive({
+import { ElMessage } from 'element-plus'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useTokenStore } from '@/stores/token.js'
+const tokenStore = useTokenStore()
+const router = useRouter();
+//==================================================================================================================================================
+//搜索框变量
+//返回按钮功能实现
+const goBack = () => {
+  router.go(-1); // 返回上一页
+};
+//=================================================================================================================================================
+const imageUrl = ref('')
+const activeTab = ref('accountSettings') // 默认激活的tab
+// 表单数据
+const accountForm = ref({
   oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
-const passwordRules = {
-  oldPassword: [
-    { required: true, message: '请输入原密码', trigger: 'blur' }
-  ],
-  newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
-  ],
-  confirmPassword: [
-    { required: true, message: '请确认新密码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value !== passwordForm.newPassword) {
-          callback(new Error('两次输入的密码不一致'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ]
-}
-const passwordFormRef = ref(null)
-
-// 初始化加载
-onMounted(() => find())
-
-const find = async () => {
+import { Cpassword } from '@/api/user';
+const changepassword = async () => {  
   try {
-    const result = await findUser({
-      account: userData.value.account
-    })
-
-    userData.value = {
-      ...userData.value,
-      nickname: result.data.nickname || '未命名用户',
-      avatarUrl: result.data.avatar || '',
-      bio: result.data.bio || '暂无简介'
+    // 前端验证
+    if (!accountForm.value.oldPassword) {
+      ElMessage.warning('请输入原密码');
+      return;
     }
 
-    ElMessage.success(result.msg || '用户信息加载完成')
+    if (!accountForm.value.newPassword) {
+      ElMessage.warning('请输入新密码');
+      return;
+    }
+
+    if (accountForm.value.newPassword.length < 8 || accountForm.value.newPassword.length > 16) {
+      ElMessage.warning('新密码长度需在8-16位之间');
+      return;
+    }
+
+    if (!accountForm.value.confirmPassword) {
+      ElMessage.warning('请确认新密码');
+      return;
+    }
+
+    if (accountForm.value.newPassword !== accountForm.value.confirmPassword) {
+      ElMessage.warning('两次输入的新密码不一致');
+      return;
+    }
+
+    if (accountForm.value.oldPassword === accountForm.value.newPassword) {
+      ElMessage.warning('新密码不能与原密码相同');
+      return;
+    }
+    // 调用API
+    const rs = await Cpassword(accountForm.value);
+    // 处理响应
+    if (rs.code === 0) { // 假设200表示成功
+      ElMessage.success(rs.msg || '密码修改成功，请重新登录');
+      tokenStore.removeToken();
+      router.push({
+        path: "/login"
+      });
+      // 清空表单
+      accountForm.value = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      };
+    } else {
+      ElMessage.error(rs.msg || '密码修改失败');
+    }
   } catch (error) {
-    ElMessage.error('查询失败: ' + (error.response?.data?.msg || '服务器错误'))
+    // 错误处理
+    console.error('修改密码出错:', error);
+    ElMessage.error('修改密码时发生错误，请稍后再试');
   }
 }
-
-// 密码修改对话框
-const showPasswordDialog = () => {
-  passwordDialogVisible.value = true
-  passwordForm.oldPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
+const profileForm = ref({
+  userId:'',
+  nickname: '',
+  avaterUrl: '',
+  bio: '',
+  address: ''
+})
+import {findUser,saveinfo} from '@/api/user.js'
+const showinfo=async()=>{
+  const rs=await findUser();
+  profileForm.value=rs.data;
 }
-
-const handlePasswordChange = async () => {
-  if (!passwordFormRef.value) return
-
-  await passwordFormRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        const result = await changePassword({
-          oldPassword: passwordForm.oldPassword,
-          newPassword: passwordForm.newPassword
-        })
-        ElMessage.success('密码修改成功')
-        passwordDialogVisible.value = false
-      } catch (error) {
-        ElMessage.error(error.response?.data?.msg || '密码修改失败')
-      }
-    }
-  })
+showinfo();
+const changeinfo=async()=>{
+  const rs=await saveinfo(profileForm.value);
+  ElMessage.success(rs.msg?rs.msg:"修改成功");
+  showinfo();
 }
+//===============================================================================================================================================
 
-const showHelpDialog = (helpKey) => {
-  const target = helpOptions.find(item => item.key === helpKey)
-  currentHelp.value = {
-    title: target.title,
-    content: target.content
-  }
-  helpDialogVisible.value = true
-}
+//===============================================================================================================================================
+
 </script>
 
 <template>
-  <div class="account-container">
-    <!-- 左侧导航 -->
-    <aside class="nav-sidebar">
-      <div class="logo-area">
-        <img src="@/assets/logo.jpg" alt="Logo" style="height: 40px;">
-      </div>
-      <nav class="menu-group">
-        <div
-            v-for="item in navItems"
-            :key="item.key"
-            :class="['menu-item', { 'active': activeNav === item.key }]"
-            @click="activeNav = item.key"
-        >
-          {{ item.label }}
-        </div>
-      </nav>
-    </aside>
-
-    <!-- 中间内容区 -->
-    <main class="content-main">
-      <!-- 账号安全内容 -->
-      <div v-if="activeNav === 'security'" class="security-content">
-        <h3 class="section-title">账号安全</h3>
-        <el-card>
-          <div class="security-item">
-            <span>登录密码</span>
-            <el-button type="text" @click="showPasswordDialog">修改密码</el-button>
-          </div>
-          <div class="security-item">
-            <span>绑定手机</span>
-            <span class="bind-info">{{ userData.phone || '未绑定' }}</span>
-            <el-button type="text">更换手机</el-button>
-          </div>
-        </el-card>
+  <el-container class="suoyou" shallow="never" style="display: flex;flex-direction: column;">
+    <!-- 修改导航栏样式 -->
+    <el-header class="toubu" style="display: flex; justify-content: space-between; align-items: center; 
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: transparent;
+            backdrop-filter: blur(10px);
+            padding: 0 20px;">
+      <!-- 左侧导航内容 -->
+      <div>
+        <el-breadcrumb style="font-size: 16px;" class="white-text">
+          <el-breadcrumb-item :to="{ path: '/' }" class="breadcrumb-item">首页</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/accountinfo' }" class="breadcrumb-item">账号设置</el-breadcrumb-item>
+        </el-breadcrumb>
       </div>
 
-      <!-- 隐私设置内容 -->
-      <div v-if="activeNav === 'privacy'" class="privacy-content">
-        <h3 class="section-title">隐私设置</h3>
-        <el-card>
-          <div class="privacy-item">
-            <span>个人主页可见性</span>
-            <el-radio-group v-model="privacySettings.profileVisible">
-              <el-radio :label="0">公开</el-radio>
-              <el-radio :label="1">仅好友</el-radio>
-              <el-radio :label="2">私密</el-radio>
-            </el-radio-group>
-          </div>
-          <div class="privacy-item">
-            <span>动态可见范围</span>
-            <el-select v-model="privacySettings.postVisible">
-              <el-option label="所有人可见" :value="0"></el-option>
-              <el-option label="仅好友可见" :value="1"></el-option>
-            </el-select>
-          </div>
-        </el-card>
+      <!-- 右侧导航组件 -->
+      <div>
+        <el-button-group>
+          <el-button class="anniu-wode white-text" @click="goBack" style="
+                        background-color: transparent;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        color: white;
+                    ">返回</el-button>
+        </el-button-group>
       </div>
-    </main>
+    </el-header>
 
-    <!-- 右侧信息栏 -->
-    <div class="user-profile">
-      <!-- 头像 -->
-      <div class="avatar-area" v-if="userData.avatarUrl">
-        <img :src="userData.avatarUrl" alt="用户头像">
-      </div>
+    <!-- 搜索区 -->
+    <div
+      style="position: relative; height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <!-- 视频背景 -->
+      <video autoplay muted loop playsinline
+        style="position: absolute;top: 0;left: 0;  width: 100% !important;height: 100% !important;object-fit: cover;z-index: 1;">
+        <source src="../assets/bbg1.mp4" type="video/mp4">
+      </video>
+    </div>
 
-      <!-- 基本信息 -->
-      <div class="user-header">
-        <h3>{{ userData.nickname }}</h3>
-        <p class="nickname">ID: {{ userData.account }}</p>
-      </div>
+    <div style="display: flex; justify-content: center; width: 100%;margin:5px 0 0 0;min-height: 500px;">
+      <div class="kapian" style="max-width: 1100px;width: 100%;">
+        <!-- 主信息区 -->
+        <div style="display: flex; flex-direction: column;background-color: #ffffff;">
+          <!-- 添加el-tabs -->
+          <el-tabs v-model="activeTab" style="margin: 20px 30px 0 30px;">
+            <el-tab-pane label="账号信息设置" name="accountSettings">
+              <h2 style="font-size: 24px; margin:20px 0 30px 0; color: #333;">修改密码</h2>
 
-      <!-- 个性签名 -->
-      <div class="user-bio">
-        {{ userData.bio || '这个用户还没有签名~' }}
-      </div>
+              <el-form label-position="top" style="max-width: 800px;">
+                <!-- 原密码 -->
+                <el-form-item label="原密码" required>
+                  <el-input v-model="accountForm.oldPassword" type="password" placeholder="请输入当前密码" show-password
+                    style="width: 100%;"></el-input>
+                </el-form-item>
 
-      <!-- 修改后的帮助中心 -->
-      <div class="help-section">
-        <h4 class="help-title">帮助中心</h4>
-        <div class="help-links">
-          <div
-              v-for="(help, index) in helpOptions"
-              :key="index"
-              class="help-link"
-              @click="showHelpDialog(help.key)"
-          >
-            {{ help.label }}
-          </div>
+                <!-- 新密码 -->
+                <el-form-item label="新密码" required>
+                  <el-input v-model="accountForm.newPassword" type="password" placeholder="请输入新密码（8-16位字符）"
+                    show-password style="width: 100%;"></el-input>
+                  <div style="font-size: 12px; color: #999; margin-top: 5px;">
+                    建议使用字母、数字和符号的组合
+                  </div>
+                </el-form-item>
+
+                <!-- 确认密码 -->
+                <el-form-item label="确认新密码" required>
+                  <el-input v-model="accountForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password
+                    style="width: 100%;"></el-input>
+                </el-form-item>
+              </el-form>
+              <!-- 提交按钮 -->
+              <div style="margin: 0 30px 30px 0;">
+                <el-button type="primary" size="large" @click="changepassword" style="width: 120px;">修改密码</el-button>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="个人信息设置" name="profileSettings">
+              <h2 style="font-size: 24px; margin:20px 0 30px 0; color: #333;">个人信息设置</h2>
+
+              <el-form label-position="top" style="max-width: 800px;">
+                <!-- 昵称 -->
+                <el-form-item label="昵称" required>
+                  <el-input v-model="profileForm.nickname" placeholder="请输入昵称（2-12个字符）" maxlength="12" show-word-limit
+                    style="width: 100%;">
+                  </el-input>
+                </el-form-item>
+
+                <!-- 头像URL -->
+                <el-form-item label="头像URL">
+                  <el-input v-model="profileForm.avaterUrl" @input="imageUrl = profileForm.avatarUrl"
+                    placeholder="请输入头像图片URL" style="width: 100%;">
+                  </el-input>
+
+                  <!-- 头像预览 -->
+                  <div v-if="imageUrl" style="margin-top: 15px;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;">头像预览：</div>
+                    <img :src="imageUrl"
+                      style="width: 100px; height: 100px; border: 1px solid #eee; border-radius: 50%; object-fit: cover;"
+                      onerror="this.style.display='none'">
+                  </div>
+                </el-form-item>
+
+                <!-- 个人简介 -->
+                <el-form-item label="个人简介">
+                  <el-input v-model="profileForm.bio" type="textarea" :rows="4" placeholder="介绍一下你自己吧（最多100字）"
+                    maxlength="200" show-word-limit style="width: 100%;">
+                  </el-input>
+                </el-form-item>
+
+                <!-- 所在地 -->
+                <el-form-item label="所在地">
+                  <el-input v-model="profileForm.address" placeholder="请输入你的所在地" maxlength="30" style="width: 100%;">
+                  </el-input>
+                </el-form-item>
+              </el-form>
+              <!-- 提交按钮 -->
+              <div style="margin: 0 30px 30px 0;">
+                <el-button @click="changeinfo"     type="primary" size="large" style="width: 120px;">保存信息</el-button>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
         </div>
       </div>
     </div>
-
-    <!-- 新增帮助弹窗 -->
-    <el-dialog
-        v-model="helpDialogVisible"
-        :title="currentHelp.title"
-        width="30%"
-    >
-      <p>{{ currentHelp.content }}</p>
-    </el-dialog>
-
-    <!-- 密码修改弹窗 -->
-    <el-dialog
-        v-model="passwordDialogVisible"
-        title="修改密码"
-        width="400px"
-        :close-on-click-modal="false"
-    >
-      <el-form
-          ref="passwordFormRef"
-          :model="passwordForm"
-          :rules="passwordRules"
-          label-width="100px"
-      >
-        <el-form-item label="原密码" prop="oldPassword">
-          <el-input
-              v-model="passwordForm.oldPassword"
-              type="password"
-              placeholder="请输入原密码"
-              show-password
-          />
-        </el-form-item>
-        <el-form-item label="新密码" prop="newPassword">
-          <el-input
-              v-model="passwordForm.newPassword"
-              type="password"
-              placeholder="请输入新密码"
-              show-password
-          />
-        </el-form-item>
-        <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input
-              v-model="passwordForm.confirmPassword"
-              type="password"
-              placeholder="请再次输入新密码"
-              show-password
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="passwordDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handlePasswordChange">确认修改</el-button>
-        </span>
-      </template>
-    </el-dialog>
-  </div>
+  </el-container>
 </template>
 
 <style scoped>
-.account-container {
-  display: grid;
-  grid-template-columns: 120px 1fr 280px;
-  grid-template-areas: "nav main profile";
-  min-height: 100vh;
-  background: #f5f5f5;
-}
-
-.nav-sidebar {
-  grid-area: nav;
-  background: #fff;
-  border-right: 1px solid #e8e8e8;
-  padding-top: 20px;
-}
-
-.logo-area {
-  padding: 20px 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.logo-area img {
+/* 原有样式保持不变，添加以下样式 */
+:deep(.el-tabs__item) {
+  font-size: 16px;
+  padding: 0 20px;
   height: 50px;
-  width: 50px;
-  object-fit: contain;
 }
 
-.menu-group {
-  margin-top: 30px;
+:deep(.el-tabs__header) {
+  margin: 0;
 }
 
-.menu-item {
-  padding: 12px 8px;
-  margin: 8px 0;
-  border-radius: 4px;
-  font-size: 13px;
+:deep(.el-tabs__nav-wrap::after) {
+  height: 1px;
+  background-color: var(--el-border-color-light);
+}
+
+.suoyou {
+  background-color: #eeefef;
+  padding-top: 0px;
+}
+
+.no-data {
+  padding: 20px;
   text-align: center;
-  white-space: nowrap;
-  cursor: pointer;
+  color: #999;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  margin: 10px;
+}
+
+.toubu {
+  background-color: #ffffff;
+}
+
+:deep(.el-breadcrumb__item) {
+  font-size: 16px;
+}
+
+:deep(.el-breadcrumb__inner) {
+  color: #2d2d2d;
   transition: all 0.3s;
 }
 
-.menu-item:hover {
-  background: #f0f0f0;
-  color: #1890ff;
+:deep(.el-breadcrumb__item:hover .el-breadcrumb__inner) {
+  color: #ababab;
 }
 
-.menu-item.active {
-  background: #e6f7ff;
-  color: #1890ff;
-  border-right: 3px solid #1890ff;
-}
-
-.content-main {
-  grid-area: main;
-  padding: 24px;
-  background: #fff;
-}
-
-.user-profile {
-  grid-area: profile;
-  padding: 24px;
-  background: #fff;
-  border-left: 1px solid #e8e8e8;
-}
-
-.help-links {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.help-link {
-  color: #1890ff;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.help-link:hover {
-  color: #40a9ff;
+.breadcrumb-item:hover {
   text-decoration: underline;
 }
 
-.dialog-footer {
+.anniu-wode {
+  padding: 12px 24px !important;
+  background-color: #01aa8e;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.anniu-wode:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.kapian {
+  border: none;
+  border-radius: 3px;
+}
+
+.weibo-search-input {
+  width: 100%;
+  height: 36px;
+  padding-left: 20px;
+  border: none;
+  border-right: none;
+  border-radius: 30px 0 0 30px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.weibo-search-input:focus {
+  box-shadow: 0 2px 8px rgba(255, 130, 0, 0.2);
+}
+
+.weibo-search-btn {
+  font-size: 18px;
+  width: 100%;
+  height: 38px;
+  border: none;
+  background: #01aa8e;
+  border-radius: 0 30px 30px 0;
+  margin-left: 0;
+}
+
+.weibo-search-btn:hover {
+  background: #02ffd5 !important;
+}
+
+.weibo-search-input::placeholder {
+  color: #8e8e8e;
+  font-size: 16px;
+}
+
+.remenba1 {
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.white-text {
+  color: white !important;
+}
+
+.white-text :deep(.el-breadcrumb__inner),
+.white-text :deep(.el-breadcrumb__item:hover .el-breadcrumb__inner),
+.white-text :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+  color: white !important;
+}
+
+.white-text :deep(.el-breadcrumb__separator) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.toubu {
+  transition: background-color 0.3s ease;
+}
+
+.anniu-wode {
+  padding: 12px 24px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.anniu-wode:hover {
+  transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.basicSS {
+  background: #ffffff;
+}
+
+.custom-avatar {
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+
+.custom-avatar::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.nav-container {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
+  align-items: center;
+  background-color: white;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
+:deep(.el-tabs) {
+  flex: 1;
+}
+
+.search-input {
+  width: 260px;
+  margin-left: 20px;
+}
+
+.breadcrumb-item:hover {
+  text-decoration: underline;
 }
 </style>

@@ -71,3 +71,19 @@ export const findotherfocususers=(id)=>{
 export const findotherfans=(id)=>{
     return request.get('sb/user/otherfans?id='+id);
 }
+
+export const Cpassword=(loginData)=>{
+    const params=new URLSearchParams();
+    for(let key in loginData){
+        params.append(key,loginData[key]);
+    }
+    return request.post('/sb/user/changepassword',params)
+}
+
+export const saveinfo=(loginData)=>{
+    const params=new URLSearchParams();
+    for(let key in loginData){
+        params.append(key,loginData[key]);
+    }
+    return request.post('/sb/user/changeinfo',params)
+}

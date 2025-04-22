@@ -27,7 +27,6 @@ public class CommentController {
 
     @PostMapping("/addcomt")
     public Result addcomment(@RequestBody Comment comt) {
-        System.out.println(comt.toString());
         commentService.addcomment(comt);
         return Result.success();
 
