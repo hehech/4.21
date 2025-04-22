@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router'  // 必须添加这行
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'//导入创建路由器函数
@@ -128,7 +128,6 @@ const hotpostclick = (id) => {
 }
 //================================================================================================================================================
 //楼贴信息展示
-import { findFloorByPostId } from '@/api/floor.js'
 const Lpostinfos = ref([
     {
         floorId: 1, postId: 1, floorNumber: 2, content: '', createTime: '',
@@ -748,11 +747,6 @@ const handlefocus_B = async (id) => {
                                         <!-- 表情和发表按钮 -->
                                         <div
                                             style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px;">
-                                            <button @click="showEmojiPicker(post.floorId)"
-                                                style="background: none; border: none; cursor: pointer;">
-                                                <img src="@/assets/tieba.png" alt="表情"
-                                                    style="width: 20px; height: 20px;">
-                                            </button>
                                             <button @click="issueComment(post)"
                                                 style="margin-left: 15px; background: #06aedc; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">
                                                 发表

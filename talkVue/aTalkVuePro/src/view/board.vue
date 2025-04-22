@@ -341,8 +341,6 @@ const handlefocus_B = async (id) => {
                                             style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
                                             <div>
                                                 <span
-                                                    style="background-color: #d82100; color: white; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-right: 8px;">置顶</span>
-                                                <span
                                                     style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;"
                                                     @click="handleTitleClick(post)"
                                                     @mouseenter="post.showUnderline = true"
@@ -383,8 +381,7 @@ const handlefocus_B = async (id) => {
                                     <div
                                         style="margin: 10px 0 10px 5px; display: flex; justify-content: space-between; align-items: center;">
                                         <div>
-                                            <span
-                                                style="background-color: #d82100; color: white; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-right: 8px;">置顶</span>
+                                            
                                             <span
                                                 style="font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;"
                                                 @click="handleTitleClick(post)" @mouseenter="post.showUnderline = true"
